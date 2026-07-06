@@ -84,6 +84,8 @@ struct ProfileBodyDataView: View {
                     PointMark(x: .value("Date", point.date),
                               y: .value("Weight", point.value))
                         .foregroundStyle(Theme.accent)
+                        .accessibilityLabel(point.date.formatted(.dateTime.month().day().year()))
+                        .accessibilityValue(String(format: "%.1f %@", point.value, ProfileFormat.weightUnitLabel(system)))
                 }
                 .chartYScale(domain: .automatic(includesZero: false))
                 .frame(height: 200)
@@ -140,6 +142,8 @@ struct ProfileBodyDataView: View {
                     PointMark(x: .value("Date", point.date),
                               y: .value(metric.label, point.value))
                         .foregroundStyle(Theme.activity)
+                        .accessibilityLabel(point.date.formatted(.dateTime.month().day().year()))
+                        .accessibilityValue(String(format: "%.1f %@", point.value, metric.unitLabel(system)))
                 }
                 .chartYScale(domain: .automatic(includesZero: false))
                 .frame(height: 180)
@@ -173,6 +177,8 @@ struct ProfileBodyDataView: View {
                     PointMark(x: .value("Date", point.date),
                               y: .value("Body fat", point.value))
                         .foregroundStyle(Theme.restore)
+                        .accessibilityLabel(point.date.formatted(.dateTime.month().day().year()))
+                        .accessibilityValue(String(format: "%.1f percent", point.value))
                 }
                 .chartYScale(domain: .automatic(includesZero: false))
                 .frame(height: 160)
