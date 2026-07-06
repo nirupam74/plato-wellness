@@ -20,6 +20,8 @@ const { defineSecret } = require("firebase-functions/params");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getAuth } = require("firebase-admin/auth");
+const { getStorage } = require("firebase-admin/storage");
 const Anthropic = require("@anthropic-ai/sdk");
 
 initializeApp();
@@ -197,6 +199,36 @@ exports.deleteCompanionHistory = onCall(
       if (snap.size < 300) break;
     }
     return { deleted };
+  }
+);
+
+// ---- deleteAccount ----------------------------------------------------------
+
+// Full account deletion, required by Apple for apps that create accounts
+// (guideline 5.1.1(v)). Removes all Firestore data, all Storage files, and the
+// Auth user itself. Irreversible.
+exports.deleteAccount = onCall(
+  { enforceAppCheck: true, cors: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+    const uid = request.auth.uid;
+
+    // Firestore: the user document and every subcollection under it.
+    await db.recursiveDelete(db.doc(`users/${uid}`));
+
+    // Storage: progress photos and anything else under the user's prefix.
+    try {
+      await getStorage().bucket().deleteFiles({ prefix: `users/${uid}/` });
+    } catch (err) {
+      console.warn("deleteAccount storage cleanup failed", err);
+    }
+
+    // Auth: the account itself.
+    await getAuth().deleteUser(uid);
+
+    return { ok: true };
   }
 );
 

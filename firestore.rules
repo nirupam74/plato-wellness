@@ -35,8 +35,14 @@ service cloud.firestore {
 
       // Companion chat: owner only. The client writes its own user messages and
       // may delete history; assistant replies are written by the callable
-      // function via the Admin SDK, which bypasses these rules.
-      match /companionMessages/{doc} { allow read, write: if isOwner(uid); }
+      // function via the Admin SDK, which bypasses these rules. User-written
+      // text is length capped to limit abuse.
+      match /companionMessages/{doc} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.text is string
+          && request.resource.data.text.size() <= 5000;
+      }
 
       // Daily rollups: written ONLY by the nightly Cloud Function (Admin SDK
       // bypasses rules). The client may read but never write.

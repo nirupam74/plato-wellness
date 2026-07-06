@@ -12,6 +12,7 @@ import Observation
 import AuthenticationServices
 import CryptoKit
 import FirebaseAuth
+import FirebaseFunctions
 
 @Observable
 final class AuthManager {
@@ -36,6 +37,21 @@ final class AuthManager {
             try Auth.auth().signOut()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Permanently delete the account and all its data (Apple guideline 5.1.1(v)).
+    /// The server removes Firestore data, Storage files, and the Auth user; we
+    /// then sign out locally.
+    @discardableResult
+    func deleteAccount() async -> Bool {
+        do {
+            _ = try await Functions.functions().httpsCallable("deleteAccount").call()
+            signOut()
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
         }
     }
 

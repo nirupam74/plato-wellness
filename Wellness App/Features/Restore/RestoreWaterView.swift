@@ -78,9 +78,11 @@ struct RestoreWaterView: View {
                 HStack(spacing: 12) {
                     RestoreWaterButton(title: "Glass", detail: "250 ml", systemImage: "cup.and.saucer.fill") {
                         restore.addWater(ml: 250)
+                        Haptics.success()
                     }
                     RestoreWaterButton(title: "Bottle", detail: "500 ml", systemImage: "waterbottle.fill") {
                         restore.addWater(ml: 500)
+                        Haptics.success()
                     }
                     RestoreWaterButton(title: "Custom", detail: "Choose", systemImage: "slider.horizontal.3") {
                         showingCustom = true

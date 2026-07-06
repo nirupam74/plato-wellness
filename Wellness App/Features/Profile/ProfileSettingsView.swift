@@ -15,24 +15,30 @@ struct ProfileSettingsView: View {
     @Environment(AppState.self) private var appState
     @Environment(HealthKitManager.self) private var healthKit
     @Environment(NotificationManager.self) private var notifications
+    @Environment(AuthManager.self) private var auth
 
     @AppStorage("appearance") private var appearance: ProfileAppearance = .system
     @AppStorage("notify.meals") private var notifyMeals = true
     @AppStorage("notify.water") private var notifyWater = true
     @AppStorage("notify.sleep") private var notifySleep = false
     @AppStorage("notify.activity") private var notifyActivity = true
+    @AppStorage("a11y.haptics") private var haptics = true
 
     @State private var showSignOutConfirm = false
     @State private var showDeleteCompanionConfirm = false
+    @State private var showDeleteAccountConfirm = false
+    @State private var isDeletingAccount = false
     @State private var healthKitNote = false
 
     var body: some View {
         Form {
             unitsSection
             appearanceSection
+            accessibilitySection
             notificationsSection
             healthKitSection
             privacySection
+            helpSection
             accountSection
         }
         .navigationTitle("Settings")
@@ -159,29 +165,73 @@ struct ProfileSettingsView: View {
 
     // MARK: - Account
 
-    private var accountSection: some View {
-        Section("Account") {
-            Button {
-                // Account management arrives with Auth.
-            } label: {
-                Label("Manage account", systemImage: "person.crop.circle")
-            }
+    private var accessibilitySection: some View {
+        Section {
+            Toggle("Haptic feedback", isOn: $haptics)
+        } header: {
+            Text("Accessibility")
+        } footer: {
+            Text("Plato Wellness works with VoiceOver, Dynamic Type, Bold Text, Increase Contrast, and Reduce Motion from your system Accessibility settings.")
+        }
+    }
 
-            Button(role: .destructive) {
+    private var helpSection: some View {
+        Section("Help & legal") {
+            NavigationLink {
+                HelpView()
+            } label: {
+                Label("Help & guidelines", systemImage: "questionmark.circle")
+            }
+            NavigationLink {
+                PrivacyPolicyView()
+            } label: {
+                Label("Privacy policy", systemImage: "lock.shield")
+            }
+        }
+    }
+
+    private var accountSection: some View {
+        Section {
+            Button {
                 showSignOutConfirm = true
             } label: {
                 Label("Sign out", systemImage: "rectangle.portrait.and.arrow.right")
             }
+
+            Button(role: .destructive) {
+                showDeleteAccountConfirm = true
+            } label: {
+                if isDeletingAccount {
+                    HStack { ProgressView(); Text("Deleting account...") }
+                } else {
+                    Label("Delete account", systemImage: "trash")
+                }
+            }
+            .disabled(isDeletingAccount)
+        } header: {
+            Text("Account")
+        } footer: {
+            Text("Deleting your account permanently removes all your data from Plato Wellness and cannot be undone.")
+        }
+        .confirmationDialog("Sign out?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
+            Button("Sign out", role: .destructive) { auth.signOut() }
+            Button("Cancel", role: .cancel) {}
         }
         .confirmationDialog(
-            "Sign out?",
-            isPresented: $showSignOutConfirm,
+            "Delete your account?",
+            isPresented: $showDeleteAccountConfirm,
             titleVisibility: .visible
         ) {
-            Button("Sign out", role: .destructive) {
-                // Sign-out wires to Auth in a later phase.
+            Button("Delete everything", role: .destructive) {
+                isDeletingAccount = true
+                Task {
+                    await auth.deleteAccount()
+                    isDeletingAccount = false
+                }
             }
             Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently deletes your profile, logs, photos, and companion history. This cannot be undone.")
         }
     }
 }
