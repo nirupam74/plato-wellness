@@ -39,6 +39,9 @@ struct MetricRing: View {
                 .rotationEffect(.degrees(-90))
                 .animation(.snappy, value: progress)
         }
+        // Purely decorative: every caller pairs the ring with labeled text, so
+        // hide it to avoid a meaningless VoiceOver stop.
+        .accessibilityHidden(true)
     }
 }
 
