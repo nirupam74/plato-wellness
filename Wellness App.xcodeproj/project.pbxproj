@@ -336,6 +336,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Plato Wellness";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Plato Wellness uses the camera to scan food barcodes so nutrition details fill in automatically.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plato Wellness reads your steps, workouts, sleep, and body data to show your complete health picture.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plato Wellness saves your nutrition, water, weight, and mindful minutes to Apple Health.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -373,6 +374,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Plato Wellness";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Plato Wellness uses the camera to scan food barcodes so nutrition details fill in automatically.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plato Wellness reads your steps, workouts, sleep, and body data to show your complete health picture.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plato Wellness saves your nutrition, water, weight, and mindful minutes to Apple Health.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

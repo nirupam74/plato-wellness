@@ -3,8 +3,9 @@
 //  Wellness App
 //
 //  The quick-add sheet. Segments for manual entry, recents, favorites, and a
-//  searchable list over saved custom foods. Barcode scanning is stubbed as a
-//  disabled row for now.
+//  searchable "Saved" list over custom foods and recipes. Manual entry also
+//  supports scanning a barcode (or typing one) to fill the food from Open Food
+//  Facts, and building new custom foods and recipes.
 //
 
 import SwiftUI
@@ -18,7 +19,7 @@ enum NutritionAddFoodMode: String, CaseIterable, Identifiable {
         case .manual:    "Manual"
         case .recents:   "Recents"
         case .favorites: "Favorites"
-        case .search:    "Search"
+        case .search:    "Saved"
         }
     }
 }
@@ -93,6 +94,22 @@ final class NutritionAddFoodViewModel {
         guard !query.isEmpty else { return foods }
         return foods.filter { $0.name.lowercased().contains(query) }
     }
+
+    func filteredRecipes(_ recipes: [Recipe]) -> [Recipe] {
+        let query = searchText.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !query.isEmpty else { return recipes }
+        return recipes.filter { $0.name.lowercased().contains(query) }
+    }
+
+    /// Fill the manual form from a scanned product so the user can confirm and add.
+    func prefill(from food: ScannedFood) {
+        name = food.name
+        servings = 1
+        caloriesText = String(food.calories)
+        proteinText = String(format: "%.0f", food.proteinG)
+        carbsText = String(format: "%.0f", food.carbsG)
+        fatText = String(format: "%.0f", food.fatG)
+    }
 }
 
 struct NutritionAddFoodView: View {
@@ -100,6 +117,13 @@ struct NutritionAddFoodView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel: NutritionAddFoodViewModel
+    @State private var showScanner = false
+    @State private var barcodeText = ""
+    @State private var isLookingUp = false
+    @State private var scanMessage: String?
+    @State private var scanIsError = false
+    @State private var showFoodEditor = false
+    @State private var showRecipeEditor = false
 
     init(initialMeal: MealType = .breakfast) {
         _viewModel = State(initialValue: NutritionAddFoodViewModel(meal: initialMeal))
@@ -137,8 +161,47 @@ struct NutritionAddFoodView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showScanner) {
+                BarcodeScannerSheet { code in
+                    showScanner = false
+                    lookUp(code)
+                }
+            }
+            .sheet(isPresented: $showFoodEditor) { NutritionCustomFoodEditor() }
+            .sheet(isPresented: $showRecipeEditor) { NutritionRecipeEditor() }
         }
         .tint(Theme.nutrition)
+    }
+
+    // MARK: - Barcode lookup
+
+    private func lookUp(_ code: String) {
+        let trimmed = code.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        isLookingUp = true
+        scanMessage = nil
+        scanIsError = false
+        Task {
+            do {
+                if let food = try await FoodDatabase.lookup(barcode: trimmed) {
+                    viewModel.prefill(from: food)
+                    viewModel.mode = .manual
+                    barcodeText = ""
+                    scanIsError = false
+                    scanMessage = food.per100g
+                        ? "Filled from \(food.name). Values are per 100 g — set servings to match what you ate."
+                        : "Filled from \(food.name). Check the values and tap Add."
+                    Haptics.success()
+                } else {
+                    scanIsError = true
+                    scanMessage = "No product found for that barcode. You can enter it manually."
+                }
+            } catch {
+                scanIsError = true
+                scanMessage = "Couldn't reach the food database. Check your connection and try again."
+            }
+            isLookingUp = false
+        }
     }
 
     // MARK: - Manual
@@ -171,19 +234,36 @@ struct NutritionAddFoodView: View {
             }
 
             Section {
-                Label {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Scan barcode")
-                        Text("Coming in a later update.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                if BarcodeScannerView.isAvailable {
+                    Button {
+                        showScanner = true
+                    } label: {
+                        Label("Scan a barcode", systemImage: "barcode.viewfinder")
                     }
-                } icon: {
-                    Image(systemName: "barcode.viewfinder")
                 }
-                .foregroundStyle(.secondary)
+                HStack {
+                    Image(systemName: "number")
+                        .foregroundStyle(.secondary)
+                    TextField("Enter barcode number", text: $barcodeText)
+                        .keyboardType(.numberPad)
+                    Button("Look up") { lookUp(barcodeText) }
+                        .disabled(barcodeText.filter(\.isNumber).count < 6 || isLookingUp)
+                }
+                if isLookingUp {
+                    HStack(spacing: 8) { ProgressView(); Text("Looking up...") }
+                        .foregroundStyle(.secondary)
+                }
+                if let scanMessage {
+                    Text(scanMessage)
+                        .font(.caption)
+                        .foregroundStyle(scanIsError ? .red : .secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } header: {
+                Text("Scan a label")
+            } footer: {
+                Text("Scans look up the free Open Food Facts database. Only the barcode is sent, and you confirm the values before adding.")
             }
-            .disabled(true)
         }
     }
 
@@ -264,18 +344,37 @@ struct NutritionAddFoodView: View {
     }
 
     private var searchList: some View {
-        List {
+        let foods = viewModel.filteredCustomFoods(nutrition.customFoods)
+        let recipes = viewModel.filteredRecipes(nutrition.recipes)
+        return List {
             mealAndServingsHeader
-            let foods = viewModel.filteredCustomFoods(nutrition.customFoods)
-            if nutrition.customFoods.isEmpty {
-                emptyState("No saved foods",
-                           "Create custom foods to build up a searchable library.",
-                           systemImage: "magnifyingglass")
-            } else if foods.isEmpty {
-                emptyState("No matches",
-                           "Try a different search.",
-                           systemImage: "magnifyingglass")
-            } else {
+
+            if nutrition.customFoods.isEmpty && nutrition.recipes.isEmpty {
+                emptyState("Nothing saved yet",
+                           "Build custom foods and recipes to log them in one tap.",
+                           systemImage: "tray")
+            }
+
+            if !recipes.isEmpty {
+                Section("Recipes") {
+                    ForEach(recipes) { recipe in
+                        Button {
+                            nutrition.logRecipe(recipe, meal: viewModel.meal)
+                            Haptics.success()
+                            dismiss()
+                        } label: {
+                            let per = recipe.perServing
+                            quickRow(name: recipe.name,
+                                     calories: per.calories,
+                                     protein: per.proteinG,
+                                     carbs: per.carbsG,
+                                     fat: per.fatG)
+                        }
+                    }
+                }
+            }
+
+            if !foods.isEmpty {
                 Section("Saved foods") {
                     ForEach(foods) { food in
                         Button {
@@ -291,8 +390,23 @@ struct NutritionAddFoodView: View {
                     }
                 }
             }
+
+            Section {
+                Button {
+                    showFoodEditor = true
+                } label: {
+                    Label("New custom food", systemImage: "fork.knife")
+                }
+                Button {
+                    showRecipeEditor = true
+                } label: {
+                    Label("New recipe from ingredients", systemImage: "list.bullet.rectangle")
+                }
+            } header: {
+                Text("Create")
+            }
         }
-        .searchable(text: $viewModel.searchText, prompt: "Search saved foods")
+        .searchable(text: $viewModel.searchText, prompt: "Search foods and recipes")
     }
 
     private var mealAndServingsHeader: some View {
