@@ -45,6 +45,7 @@ struct RestoreMoodCheckInSheet: View {
                             energy: energy,
                             note: trimmed.isEmpty ? nil : trimmed
                         ))
+                        Haptics.success()
                         dismiss()
                     }
                 }

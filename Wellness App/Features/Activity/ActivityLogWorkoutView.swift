@@ -131,6 +131,7 @@ struct ActivityLogWorkoutView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         activity.add(viewModel.makeEntry())
+                        Haptics.success()
                         dismiss()
                     }
                     .disabled(!viewModel.canSave)

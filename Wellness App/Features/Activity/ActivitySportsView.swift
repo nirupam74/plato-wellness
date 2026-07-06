@@ -85,6 +85,7 @@ struct ActivitySportsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         activity.add(viewModel.makeEntry(weightKg: weightKg))
+                        Haptics.success()
                         dismiss()
                     }
                     .disabled(!viewModel.canSave)

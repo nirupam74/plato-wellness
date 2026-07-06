@@ -201,6 +201,7 @@ struct NutritionAddFoodView: View {
     private func saveManual() {
         guard let entry = viewModel.makeManualEntry() else { return }
         nutrition.add(entry)
+        Haptics.success()
         dismiss()
     }
 
