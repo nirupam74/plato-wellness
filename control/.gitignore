@@ -1,0 +1,3 @@
+# Runtime state — local only, changes constantly, not source.
+tasks.json
+state.json

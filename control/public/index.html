@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wellness — Loop Control</title>
+<style>
+  :root{
+    --bg:#0c0c0e; --panel:#15151a; --panel2:#1c1c22; --line:#2a2a32;
+    --ink:#f4f4f6; --mut:#9a9aa6; --accent:#16b8a6; --green:#37c272; --red:#ff5c5c; --blue:#5aa9ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  a{color:var(--blue);text-decoration:none}
+  header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#15151a,#121216);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .logo{font-weight:800;letter-spacing:.3px}
+  .logo b{color:var(--accent)}
+  .pill{font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--mut)}
+  .pill.run{color:var(--green);border-color:#1e5a38;background:#0f2419}
+  .pill.pause{color:var(--accent);border-color:#5a3a1e;background:#241a0f}
+  .spacer{flex:1}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:7px 13px;border-radius:9px}
+  button:hover{border-color:#3a3a44}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#04211d;font-weight:700}
+  button.danger{color:var(--red);border-color:#5a2424}
+  button.ghost{background:transparent}
+  button:disabled{opacity:.5;cursor:default}
+  main{max-width:1180px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .col-wide{grid-column:1 / -1}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .card h2{margin:0;padding:13px 16px;font-size:13px;letter-spacing:.4px;text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .card h2 .count{margin-left:auto;color:var(--ink);background:var(--panel2);border:1px solid var(--line);padding:1px 8px;border-radius:999px;font-size:12px}
+  .body{padding:14px 16px;max-height:460px;overflow:auto}
+  .muted{color:var(--mut)}
+  textarea{width:100%;resize:vertical;min-height:64px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:10px;font:inherit}
+  .row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  select{background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:7px 10px;font:inherit}
+  label.ck{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);border:1px solid var(--line);padding:6px 10px;border-radius:9px;background:var(--panel2)}
+  .task{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:var(--panel2)}
+  .task.active{border-color:#5a3a1e;box-shadow:0 0 0 1px #5a3a1e inset}
+  .task .meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px;flex-wrap:wrap}
+  .tag{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line)}
+  .tag.pending{color:var(--blue)} .tag.in_progress{color:var(--accent);border-color:#5a3a1e}
+  .tag.done{color:var(--green)} .tag.high{color:var(--accent);border-color:#5a3a1e}
+  .tag.ok{color:var(--green);border-color:#1e5a38} .tag.warn{color:var(--red);border-color:#5a2424} .tag.rev{color:var(--blue);border-color:#234a6e}
+  /* progress bar */
+  .bar{height:7px;border-radius:6px;background:#0a0a0c;border:1px solid var(--line);overflow:hidden;margin-top:9px}
+  .bar .fill{height:100%;background:linear-gradient(90deg,#16b8a6,#57e0d0);transition:width .5s ease}
+  .bar .fill.done{background:linear-gradient(90deg,#1e7a44,#37c272)}
+  .timing{display:flex;gap:10px;font-size:12px;color:var(--mut);margin-top:6px;flex-wrap:wrap}
+  .timing b{color:var(--ink);font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--panel)}
+  td.area code{color:var(--accent)}
+  .commit{border-bottom:1px solid var(--line);padding:9px 2px}
+  .commit .sub{cursor:pointer}
+  .commit .hash{color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-size:12px;margin-right:8px}
+  pre.diff{display:none;margin:8px 0 2px;background:#0a0a0c;border:1px solid var(--line);border-radius:9px;padding:10px;overflow:auto;max-height:340px;font:12px/1.45 ui-monospace,Menlo,monospace;white-space:pre}
+  pre.diff .add{color:var(--green)} pre.diff .del{color:var(--red)} pre.diff .hd{color:var(--blue)}
+  ul.sec{margin:0;padding-left:18px} ul.sec li{margin-bottom:7px}
+  .foot{max-width:1180px;margin:0 auto;padding:6px 20px 30px;color:var(--mut);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Well<b>ness</b> · Loop Control</div>
+  <span id="statePill" class="pill">…</span>
+  <span id="aheadPill" class="pill">…</span>
+  <span id="hbPill" class="pill">…</span>
+  <div class="spacer"></div>
+  <button id="selfBtn" class="ghost" title="When ON, the loop finds & fixes work on its own when your queue is empty. When OFF, it only does tasks you give it.">…</button>
+  <button id="deployTog" class="ghost" title="When ON, verified changes auto-deploy to production. When OFF, they're staged for you to deploy.">…</button>
+  <button id="pauseBtn" class="primary">…</button>
+  <button id="refreshBtn" class="ghost">↻ Refresh</button>
+</header>
+
+<main>
+  <!-- TASK FEEDER -->
+  <section class="card col-wide">
+    <h2>Feed it tasks <span class="count" id="qcount">0 queued</span></h2>
+    <div class="body">
+      <textarea id="taskText" placeholder="Describe a task in plain English. The loop reads it, does it, verifies the build, then a separate reviewer re-checks that everything was done correctly, then it commits + pushes and reports back here."></textarea>
+      <div class="row">
+        <select id="taskArea" title="Optional hint">
+          <option value="">Area: any</option>
+          <option>nutrition</option><option>activity</option><option>restore</option><option>companion</option>
+          <option>profile</option><option>onboarding</option><option>healthkit</option><option>firebase</option>
+          <option>ios</option><option>bug-hunt</option><option>security</option>
+        </select>
+        <select id="taskPriority" title="Priority">
+          <option value="normal">Priority: normal</option>
+          <option value="high">Priority: high (jump the queue)</option>
+        </select>
+        <button id="addBtn" class="primary">+ Add task</button>
+        <span id="addMsg" class="muted"></span>
+      </div>
+      <div style="margin-top:14px" id="taskList"></div>
+    </div>
+  </section>
+
+  <!-- ACTIVITY LOG -->
+  <section class="card">
+    <h2>Activity log <span class="count" id="logcount">0</span></h2>
+    <div class="body" id="logBody"><p class="muted">Loading…</p></div>
+  </section>
+
+  <!-- COMMIT / DIFF FEED -->
+  <section class="card">
+    <h2>Changes (click a commit to see the diff) <span class="count" id="ccount">0</span></h2>
+    <div class="body" id="commitBody"><p class="muted">Loading…</p></div>
+  </section>
+
+  <!-- DEPLOY -->
+  <section class="card col-wide">
+    <h2>Deploy staged changes <span class="count">inactive</span></h2>
+    <div class="body">
+      <p class="muted">No backend is wired yet — Firebase, HealthKit, and Auth are stubbed, so there is nothing to deploy. This panel lights up once a Firebase project exists: add its targets to <code>ALLOW</code> in <code>control/server.js</code> (for example <code>firestore:rules</code>, <code>storage</code>, <code>functions</code>, <code>hosting:app</code>) and uncheck the disabled state below.</p>
+      <div class="row">
+        <label class="ck"><input type="checkbox" class="dt" value="firestore:rules" disabled> Firestore rules</label>
+        <label class="ck"><input type="checkbox" class="dt" value="storage" disabled> Storage rules</label>
+        <label class="ck"><input type="checkbox" class="dt" value="functions" disabled> Cloud Functions</label>
+        <label class="ck"><input type="checkbox" class="dt" value="hosting:app" disabled> Web app</label>
+      </div>
+      <div class="row"><button id="deployBtn" class="danger" disabled>⚠ Deploy selected to production</button><span id="deployMsg" class="muted">disabled until a backend is connected</span></div>
+      <pre id="deployOut" class="diff"></pre>
+    </div>
+  </section>
+
+  <!-- SECURITY -->
+  <section class="card col-wide">
+    <h2>Security &amp; guardrails</h2>
+    <div class="body"><ul class="sec" id="secBody"><li class="muted">Loading…</li></ul></div>
+  </section>
+</main>
+
+<div class="foot" id="foot"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+async function get(u){ const r = await fetch(u); return r.json(); }
+async function post(u, body){ const r = await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})}); return r.json(); }
+function esc(s){ return (s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function ago(iso){ if(!iso) return ''; const s=(Date.now()-new Date(iso))/1000; if(s<60)return Math.floor(s)+'s ago'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+function fmtDur(sec){ sec=Math.max(0,Math.round(sec)); const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60; if(h)return `${h}h ${m}m`; return m?`${m}m ${s}s`:`${s}s`; }
+
+let AVG = 0;
+function timingHtml(t){
+  if(t.status==='done'){
+    let d=t.durationSeconds; if(!d&&t.doneAt&&t.startedAt) d=(new Date(t.doneAt)-new Date(t.startedAt))/1000;
+    return `<div class="timing"><span>total <b>${fmtDur(d||0)}</b></span></div>`;
+  }
+  if(t.status==='in_progress'){
+    const el=(Date.now()-new Date(t.startedAt))/1000;
+    const p=t.progress||0;
+    let eta; if(p>=5 && p<95) eta=el*(100-p)/p; else eta=Math.max(0,(AVG||360)-el);
+    return `<div class="timing"><span>elapsed <b>${fmtDur(el)}</b></span><span>~<b>${fmtDur(eta)}</b> left</span><span>${p}%${t.phase?` · ${esc(t.phase)}`:''}</span></div>`;
+  }
+  return '';
+}
+function barHtml(t){
+  const p = t.status==='done' ? 100 : (t.progress||0);
+  if(t.status==='pending') return '';
+  return `<div class="bar"><div class="fill ${t.status==='done'?'done':''}" style="width:${p}%"></div></div>`;
+}
+function reviewTag(t){
+  if(!t.review || !t.review.status || t.review.status==='pending') return '';
+  if(t.review.status==='passed') return '<span class="tag ok" title="independently re-checked">✓ verified</span>';
+  if(t.review.status==='failed') return `<span class="tag warn" title="${esc(t.review.notes||'')}">⚠ review found gaps</span>`;
+  return '';
+}
+
+async function loadState(){
+  const s = await get('/api/state'); AVG = s.avgTaskSeconds || 0;
+  const paused = !!s.paused;
+  $('statePill').textContent = paused ? '⏸ Paused' : '● Running';
+  $('statePill').className = 'pill ' + (paused?'pause':'run');
+  $('aheadPill').textContent = (s.ahead||'0') + ' commits ahead of main';
+  $('hbPill').textContent = s.current ? ('working: ' + (s.note||s.current)) : (s.heartbeat ? ('idle · last active ' + ago(s.heartbeat)) : 'idle');
+  $('pauseBtn').textContent = paused ? '▶ Resume loop' : '⏸ Pause loop';
+  $('pauseBtn').className = paused ? 'primary' : '';
+  const a = s.autonomy || {selfDirected:true, autoDeploy:true};
+  $('selfBtn').textContent = (a.selfDirected?'● ':'○ ') + 'Self-directed';
+  $('selfBtn').style.color = a.selfDirected ? 'var(--green)' : 'var(--mut)';
+  $('deployTog').textContent = (a.autoDeploy?'● ':'○ ') + 'Auto-deploy';
+  $('deployTog').style.color = a.autoDeploy ? 'var(--accent)' : 'var(--mut)';
+  $('foot').textContent = 'Branch ' + (s.branch||'?') + (s.dirty?' · uncommitted changes present':' · working tree clean') + (AVG?` · avg task ${fmtDur(AVG)}`:'') + ' · dashboard reads repo state + the task queue; it never runs Claude. Deploys are human-triggered only.';
+}
+async function loadTasks(){
+  const tasks = await get('/api/tasks');
+  const pending = tasks.filter(t=>t.status==='pending');
+  const active = tasks.filter(t=>t.status==='in_progress');
+  const done = tasks.filter(t=>t.status==='done').slice(-12).reverse();
+  $('qcount').textContent = pending.length + ' queued';
+  const render = (t)=>{
+    const cls = t.status;
+    const pr = t.priority==='high' ? '<span class="tag high">high</span>' : '';
+    const del = t.status==='pending' ? `<button class="ghost danger" style="padding:3px 8px;font-size:12px" onclick="delTask('${t.id}')">remove</button>` : '';
+    const commit = t.commit ? ` · <span class="hash">${esc(t.commit)}</span>` : '';
+    const result = t.result ? `<div class="muted" style="margin-top:6px">${esc(t.result)}</div>` : '';
+    return `<div class="task ${cls==='in_progress'?'active':''}"><div>${esc(t.text)}</div>
+      ${barHtml(t)}${timingHtml(t)}
+      <div class="meta"><span class="tag ${cls}">${cls.replace('_',' ')}</span>${pr}${reviewTag(t)}
+      ${t.area?`<span class="tag">${esc(t.area)}</span>`:''}
+      <span>${ago(t.createdAt)}</span>${commit}<span class="spacer"></span>${del}</div>${result}</div>`;
+  };
+  let html = '';
+  if(active.length) html += active.map(render).join('');
+  if(pending.length) html += pending.map(render).join('');
+  if(done.length) html += `<div class="muted" style="margin:10px 0 6px;display:flex"><span>Recently completed</span><span class="spacer"></span><button class="ghost" style="padding:2px 8px;font-size:12px" onclick="clearDone()">clear</button></div>` + done.map(render).join('');
+  if(!html) html = '<p class="muted">No tasks yet. Add one above and the loop will pick it up.</p>';
+  $('taskList').innerHTML = html;
+}
+async function loadLog(){
+  const rows = await get('/api/log');
+  $('logcount').textContent = rows.length;
+  if(!rows.length){ $('logBody').innerHTML='<p class="muted">No entries yet.</p>'; return; }
+  $('logBody').innerHTML = '<table><thead><tr><th>#</th><th>Area</th><th>What</th><th>✓</th></tr></thead><tbody>' +
+    rows.map(r=>`<tr><td>${esc(r.num)}</td><td class="area"><code>${esc(r.area)}</code></td><td>${esc(r.desc)}<div class="muted" style="font-size:12px">${esc(r.files)}</div></td><td>${esc(r.verified)}</td></tr>`).join('') +
+    '</tbody></table>';
+}
+function colorDiff(d){
+  return esc(d).split('\n').map(l=>{
+    if(/^(diff --git|index |@@|---|\+\+\+)/.test(l)) return '<span class="hd">'+l+'</span>';
+    if(l.startsWith('+')) return '<span class="add">'+l+'</span>';
+    if(l.startsWith('-')) return '<span class="del">'+l+'</span>';
+    return l;
+  }).join('\n');
+}
+async function loadCommits(){
+  const cs = await get('/api/commits');
+  $('ccount').textContent = cs.length;
+  if(!cs.length){ $('commitBody').innerHTML='<p class="muted">No commits yet.</p>'; return; }
+  $('commitBody').innerHTML = cs.map(c=>`<div class="commit"><div class="sub" onclick="toggleDiff('${c.hash}',this)"><span class="hash">${esc(c.hash)}</span>${esc(c.subject)}<div class="muted" style="font-size:12px;margin-top:2px">${esc(c.author)} · ${esc(c.date)}</div></div><pre class="diff" id="d-${c.hash}"></pre></div>`).join('');
+}
+async function toggleDiff(hash, el){
+  const pre = $('d-'+hash);
+  if(pre.style.display==='block'){ pre.style.display='none'; return; }
+  if(!pre.dataset.loaded){ pre.textContent='loading diff…'; pre.style.display='block'; const r = await get('/api/commit?hash='+hash); pre.innerHTML = colorDiff(r.diff||'(empty)'); pre.dataset.loaded='1'; }
+  pre.style.display='block';
+}
+async function loadSecurity(){
+  const s = await get('/api/security');
+  $('secBody').innerHTML = (s.guardrails||[]).map(g=>`<li>${esc(g)}</li>`).join('');
+}
+async function delTask(id){ await post('/api/tasks/delete',{id}); loadTasks(); }
+async function clearDone(){ await post('/api/tasks/clear-done'); loadTasks(); }
+
+$('addBtn').onclick = async ()=>{
+  const text = $('taskText').value.trim();
+  if(!text){ $('addMsg').textContent='enter a task first'; return; }
+  await post('/api/tasks',{text, area:$('taskArea').value, priority:$('taskPriority').value});
+  $('taskText').value=''; $('addMsg').textContent='queued ✓'; setTimeout(()=>$('addMsg').textContent='',2000);
+  loadTasks();
+};
+$('pauseBtn').onclick = async ()=>{ const s = await get('/api/state'); await post(s.paused?'/api/resume':'/api/pause'); loadState(); };
+$('selfBtn').onclick = async ()=>{ const s = await get('/api/state'); const a=s.autonomy||{}; await post('/api/autonomy',{key:'selfDirected',value:!a.selfDirected}); loadState(); };
+$('deployTog').onclick = async ()=>{ const s = await get('/api/state'); const a=s.autonomy||{}; if(!a.autoDeploy && !confirm('Turn ON auto-deploy? Verified changes will be pushed to PRODUCTION automatically.')) return; await post('/api/autonomy',{key:'autoDeploy',value:!a.autoDeploy}); loadState(); };
+$('refreshBtn').onclick = refreshAll;
+$('deployBtn').onclick = async ()=>{
+  const targets = [...document.querySelectorAll('.dt:checked')].map(c=>c.value);
+  if(!targets.length){ $('deployMsg').textContent='select at least one target'; return; }
+  if(!confirm('Deploy to PRODUCTION: '+targets.join(', ')+'\n\nThis changes the live backend. Continue?')) return;
+  $('deployBtn').disabled=true; $('deployMsg').textContent='deploying… (can take a minute)';
+  $('deployOut').style.display='block'; $('deployOut').textContent='running firebase deploy --only '+targets.join(',')+' …';
+  try{
+    const r = await post('/api/deploy',{targets});
+    $('deployOut').textContent = (r.output||'(no output)');
+    $('deployMsg').textContent = r.ok ? 'deployed ✓' : 'deploy failed — see output';
+  }catch(e){ $('deployMsg').textContent='request error'; $('deployOut').textContent=String(e); }
+  $('deployBtn').disabled=false;
+};
+
+function refreshAll(){ loadState(); loadTasks(); loadLog(); loadCommits(); loadSecurity(); }
+refreshAll();
+setInterval(()=>{ loadState(); loadTasks(); }, 3000);   // fast: state + queue + live progress
+setInterval(()=>{ loadLog(); loadCommits(); }, 15000);  // slower: log + commits
+</script>
+</body>
+</html>
