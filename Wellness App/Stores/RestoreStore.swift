@@ -132,6 +132,14 @@ final class RestoreStore {
         }
     }
 
+    func removeMood(_ entry: MoodEntry) {
+        if let ref = doc("moodEntries", entry.id) {
+            ref.delete()
+        } else {
+            moodEntries.removeAll { $0.id == entry.id }
+        }
+    }
+
     var todayMood: MoodEntry? { moodEntries.first { $0.loggedAt.isSameDay(as: Date()) } }
 
     func moodSeries(lastDays days: Int) -> [(date: Date, mood: Int)] {

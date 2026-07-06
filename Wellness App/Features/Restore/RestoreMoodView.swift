@@ -20,6 +20,7 @@ struct RestoreMoodView: View {
             VStack(spacing: 16) {
                 todayCard
                 trendCard
+                recentCard
             }
             .padding()
         }
@@ -115,6 +116,40 @@ struct RestoreMoodView: View {
                         Label("Not enough check ins", systemImage: "chart.line.uptrend.xyaxis")
                     } description: {
                         Text("Check in a few days in a row to see your mood trend.")
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var recentCard: some View {
+        let recent = Array(restore.moodEntries.sorted { $0.loggedAt > $1.loggedAt }.prefix(10))
+        if !recent.isEmpty {
+            Card {
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeaderRow("Recent check ins")
+                    ForEach(recent) { entry in
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(entry.loggedAt.formatted(.dateTime.month().day().hour().minute()))
+                                    .font(.subheadline)
+                                Text("Mood \(entry.mood) of 5")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer(minLength: 0)
+                            Button(role: .destructive) {
+                                restore.removeMood(entry)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel("Delete check in from \(entry.loggedAt.formatted(.dateTime.month().day()))")
+                        }
+                        .accessibilityElement(children: .combine)
+                        if entry.id != recent.last?.id {
+                            Divider()
+                        }
                     }
                 }
             }
