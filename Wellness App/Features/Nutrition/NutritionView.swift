@@ -14,6 +14,7 @@ struct NutritionView: View {
     @Environment(UserStore.self) private var user
 
     @State private var viewModel = NutritionViewModel()
+    @State private var showMealPlan = false
 
     /// Falls back to a neutral target set if the profile has not loaded yet.
     private var targets: DailyTargets {
@@ -52,6 +53,12 @@ struct NutritionView: View {
             .listStyle(.insetGrouped)
             .navigationTitle("Nutrition")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { showMealPlan = true } label: {
+                        Image(systemName: "calendar")
+                    }
+                    .accessibilityLabel("Plan meals")
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button { viewModel.presentAddFood() } label: {
                         Image(systemName: "plus")
@@ -61,6 +68,9 @@ struct NutritionView: View {
             }
             .sheet(isPresented: $viewModel.showingAddFood) {
                 NutritionAddFoodView(initialMeal: viewModel.quickAddMeal)
+            }
+            .sheet(isPresented: $showMealPlan) {
+                MealPlanView()
             }
         }
         .tint(Theme.nutrition)
