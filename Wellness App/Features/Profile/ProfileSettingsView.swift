@@ -40,6 +40,7 @@ struct ProfileSettingsView: View {
             privacySection
             helpSection
             accountSection
+            aboutSection
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
@@ -238,6 +239,25 @@ struct ProfileSettingsView: View {
         } message: {
             Text("This permanently deletes your profile, logs, photos, and companion history. This cannot be undone.")
         }
+    }
+
+    private var aboutSection: some View {
+        Section {
+            LabeledContent("Version", value: appVersion)
+        } header: {
+            Text("About")
+        } footer: {
+            Text("Plato Wellness. Made to help you feel your best.")
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("App version \(appVersion)")
+    }
+
+    private var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = info?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
     }
 }
 
