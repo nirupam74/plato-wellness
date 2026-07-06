@@ -26,3 +26,4 @@ change.
 | 2026-07-06 00:11 | self-directed | Per-mark VoiceOver a11y on sleep (bars) + mood (points) trend charts | bc4c283 |
 | 2026-07-06 00:17 | self-directed | Wired the sleep view Apple Health import button to real syncHealthKit (was a stale disabled stub) | 3bcd981 |
 | 2026-07-06 00:23 | self-directed | Per-point VoiceOver a11y on weight, measurement, and body-fat trend charts (ProfileBodyDataView) | 5fcb9a0 |
+| 2026-07-06 00:30 | self-directed | MetricRing marked accessibilityHidden (decorative); reviewed all 5 ring sites (already labeled) + Firestore rules (already owner-scoped, companion length-capped, no unsafe change to make) | 1db2a98 |
