@@ -112,6 +112,14 @@ final class RestoreStore {
         }
     }
 
+    func removeSleep(_ entry: SleepEntry) {
+        if let ref = doc("sleepEntries", entry.id) {
+            ref.delete()
+        } else {
+            sleepEntries.removeAll { $0.id == entry.id }
+        }
+    }
+
     var latestSleep: SleepEntry? { sleepEntries.sorted { $0.wakeTime > $1.wakeTime }.first }
 
     func sleepSeries(lastDays days: Int) -> [(date: Date, hours: Double)] {

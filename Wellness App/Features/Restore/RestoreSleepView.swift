@@ -25,6 +25,7 @@ struct RestoreSleepView: View {
             VStack(spacing: 16) {
                 summaryCard
                 trendCard
+                recentCard
                 importCard
             }
             .padding()
@@ -127,6 +128,41 @@ struct RestoreSleepView: View {
                         Label("No trend yet", systemImage: "chart.bar")
                     } description: {
                         Text("A couple of nights of sleep will fill in this chart.")
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var recentCard: some View {
+        let recent = Array(restore.sleepEntries.sorted { $0.wakeTime > $1.wakeTime }.prefix(10))
+        if !recent.isEmpty {
+            Card {
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeaderRow("Recent nights")
+                    ForEach(recent) { entry in
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(entry.wakeTime.formatted(.dateTime.weekday().month().day()))
+                                    .font(.subheadline)
+                                Text(String(format: "%.1f h", entry.durationHours)
+                                     + (entry.quality.map { ", quality \($0) of 5" } ?? ""))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer(minLength: 0)
+                            Button(role: .destructive) {
+                                restore.removeSleep(entry)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel("Delete sleep from \(entry.wakeTime.formatted(.dateTime.month().day()))")
+                        }
+                        .accessibilityElement(children: .combine)
+                        if entry.id != recent.last?.id {
+                            Divider()
+                        }
                     }
                 }
             }
