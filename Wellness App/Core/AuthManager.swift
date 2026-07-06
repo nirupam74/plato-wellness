@@ -40,6 +40,36 @@ final class AuthManager {
         }
     }
 
+    // MARK: - Email and password
+
+    func signUp(email: String, password: String) async {
+        errorMessage = nil
+        do {
+            try await Auth.auth().createUser(withEmail: email, password: password)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func signIn(email: String, password: String) async {
+        errorMessage = nil
+        do {
+            try await Auth.auth().signIn(withEmail: email, password: password)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func sendPasswordReset(email: String) async {
+        errorMessage = nil
+        do {
+            try await Auth.auth().sendPasswordReset(withEmail: email)
+            errorMessage = "Password reset email sent."
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     /// Permanently delete the account and all its data (Apple guideline 5.1.1(v)).
     /// The server removes Firestore data, Storage files, and the Auth user; we
     /// then sign out locally.
