@@ -11,6 +11,7 @@ import SwiftUI
 
 struct RestoreView: View {
     @Environment(RestoreStore.self) private var restore
+    @Environment(AppState.self) private var appState
     @State private var viewModel = RestoreViewModel()
 
     var body: some View {
@@ -36,6 +37,7 @@ struct RestoreView: View {
                 .padding()
             }
             .background(Color(uiColor: .systemGroupedBackground))
+            .refreshable { await appState.syncHealthKit() }
             .navigationTitle("Restore")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
