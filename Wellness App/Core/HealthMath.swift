@@ -142,15 +142,32 @@ enum HealthMath {
         return burn(met: base + (openWater ? 0.5 : 0), minutes: minutes, weightKg: weightKg)
     }
 
-    /// Strength-training estimate. Vigorous free-weight work is ~6 MET, moderate
-    /// ~4, light ~3.5.
-    static func strengthBurn(minutes: Int, weightKg: Double, intensity: ActivityIntensity) -> Int {
-        let met: Double
+    /// Strength-training estimate driven by the actual work done, not duration
+    /// alone: a light time-based base (the session's general metabolic cost)
+    /// plus components from total lifted volume (weight times reps) and total
+    /// reps (so bodyweight work still counts). Every logged attribute moves the
+    /// number.
+    static func strengthBurn(
+        exercises: [StrengthEntry],
+        minutes: Int,
+        weightKg: Double,
+        intensity: ActivityIntensity
+    ) -> Int {
+        // Time base: light activity MET scaled by how hard the session felt.
+        let baseMet: Double
         switch intensity {
-        case .low:    met = 3.5
-        case .medium: met = 5.0
-        case .high:   met = 6.0
+        case .low:    baseMet = 2.8
+        case .medium: baseMet = 3.5
+        case .high:   baseMet = 4.2
         }
-        return burn(met: met, minutes: minutes, weightKg: weightKg)
+        let timeKcal = Double(burn(met: baseMet, minutes: minutes, weightKg: weightKg))
+
+        // Work base: lifted volume and reps. Coefficients tuned so a typical
+        // hard session lands in a believable range without overcounting.
+        let volumeKg = exercises.reduce(0.0) { $0 + $1.volumeKg }   // Σ weight × reps
+        let totalReps = exercises.reduce(0) { $0 + $1.totalReps }
+        let workKcal = volumeKg * 0.012 + Double(totalReps) * 0.15
+
+        return Int((timeKcal + workKcal).rounded())
     }
 }

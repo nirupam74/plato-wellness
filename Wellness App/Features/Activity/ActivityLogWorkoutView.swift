@@ -20,10 +20,41 @@ final class ActivityLogWorkoutViewModel {
     // Swim specifics, used when type == .swim.
     var poolType: PoolType = .indoorPool
     var poolLengthText: String = ""
+    var lapsText: String = ""
     var swimIntensity: ActivityIntensity = .medium
+
+    // Set when editing an existing entry so Save overwrites it in place.
+    private(set) var editingID: String?
+    private(set) var editingLoggedAt: Date?
 
     private var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Load an existing (non sport/strength) entry for editing.
+    func load(_ entry: ActivityEntry) {
+        editingID = entry.id
+        editingLoggedAt = entry.loggedAt
+        type = entry.type
+        name = entry.name
+        durationMin = entry.durationMin
+        caloriesBurned = entry.caloriesBurned
+        distanceText = entry.distanceKm.map { String(format: "%.2f", $0) } ?? ""
+        heartRateText = entry.avgHeartRate.map(String.init) ?? ""
+        if let swim = entry.details?.swim {
+            poolType = swim.poolType
+            poolLengthText = swim.poolLengthM.map(String.init) ?? ""
+            lapsText = swim.laps.map(String.init) ?? ""
+            swimIntensity = swim.intensity
+        }
+    }
+
+    /// Distance computed from pool length and laps, when both are provided.
+    var derivedSwimKm: Double? {
+        guard isSwim,
+              let length = Int(poolLengthText), length > 0,
+              let laps = Int(lapsText), laps > 0 else { return nil }
+        return Double(length * laps) / 1000.0
     }
 
     /// Distance only makes sense for the distance based activities.
@@ -62,21 +93,25 @@ final class ActivityLogWorkoutViewModel {
         return ActivityDetails(swim: SwimDetails(
             poolType: poolType,
             poolLengthM: length.flatMap { $0 > 0 ? $0 : nil },
-            laps: nil,
+            laps: Int(lapsText).flatMap { $0 > 0 ? $0 : nil },
             intensity: swimIntensity
         ))
     }
 
     func makeEntry() -> ActivityEntry {
         let resolvedName = trimmedName.isEmpty ? type.label : trimmedName
-        let distance = showsDistance ? Double(distanceText.replacingOccurrences(of: ",", with: ".")) : nil
+        // Swim distance derives from pool length x laps when available.
+        let manualDistance = showsDistance ? Double(distanceText.replacingOccurrences(of: ",", with: ".")) : nil
+        let distance = derivedSwimKm ?? manualDistance
         return ActivityEntry(
+            id: editingID ?? UUID().uuidString,
             type: type,
             name: resolvedName,
             durationMin: durationMin,
             caloriesBurned: max(0, caloriesBurned),
             distanceKm: distance.flatMap { $0 > 0 ? $0 : nil },
             avgHeartRate: Int(heartRateText).flatMap { $0 > 0 ? $0 : nil },
+            loggedAt: editingLoggedAt ?? Date(),
             details: swimDetails()
         )
     }
@@ -87,6 +122,10 @@ struct ActivityLogWorkoutView: View {
     @Environment(UserStore.self) private var user
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = ActivityLogWorkoutViewModel()
+    @State private var didLoad = false
+
+    /// When set, the sheet edits this existing entry instead of creating one.
+    var editing: ActivityEntry?
 
     private var weightKg: Double { user.profile?.currentWeightKg ?? 70 }
 
@@ -95,7 +134,7 @@ struct ActivityLogWorkoutView: View {
             Form {
                 Section("Activity") {
                     Picker("Type", selection: $viewModel.type) {
-                        ForEach(ActivityType.allCases) { type in
+                        ForEach(ActivityType.workoutLoggable) { type in
                             Label(type.label, systemImage: type.systemImage).tag(type)
                         }
                     }
@@ -124,7 +163,7 @@ struct ActivityLogWorkoutView: View {
                     }
                 }
 
-                if viewModel.showsDistance {
+                if viewModel.showsDistance && !viewModel.isSwim {
                     Section("Distance") {
                         HStack {
                             Text("Distance")
@@ -139,7 +178,7 @@ struct ActivityLogWorkoutView: View {
                 }
 
                 if viewModel.isSwim {
-                    Section("Swim") {
+                    Section {
                         Picker("Water", selection: $viewModel.poolType) {
                             ForEach(PoolType.allCases) { type in
                                 Text(type.label).tag(type)
@@ -154,12 +193,28 @@ struct ActivityLogWorkoutView: View {
                                 .frame(maxWidth: 80)
                             Text("m").foregroundStyle(.secondary)
                         }
+                        HStack {
+                            Text("Laps")
+                            Spacer()
+                            TextField("Optional", text: $viewModel.lapsText)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(maxWidth: 80)
+                        }
                         Picker("Intensity", selection: $viewModel.swimIntensity) {
                             ForEach(ActivityIntensity.allCases) { level in
                                 Text(level.label).tag(level)
                             }
                         }
                         .pickerStyle(.segmented)
+                    } header: {
+                        Text("Swim")
+                    } footer: {
+                        if let km = viewModel.derivedSwimKm {
+                            Text(String(format: "Distance from laps: %.2f km (%.0f m).", km, km * 1000))
+                        } else {
+                            Text("Enter pool length and laps and we'll calculate the distance.")
+                        }
                     }
                 }
 
@@ -175,19 +230,25 @@ struct ActivityLogWorkoutView: View {
                     }
                 }
             }
-            .navigationTitle("Log workout")
+            .navigationTitle(editing == nil ? "Log workout" : "Edit workout")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button(editing == nil ? "Save" : "Update") {
                         activity.add(viewModel.makeEntry())
                         Haptics.success()
                         dismiss()
                     }
                     .disabled(!viewModel.canSave)
+                }
+            }
+            .onAppear {
+                if let editing, !didLoad {
+                    viewModel.load(editing)
+                    didLoad = true
                 }
             }
         }

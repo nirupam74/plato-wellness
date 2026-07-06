@@ -16,6 +16,18 @@ final class ActivityStrengthViewModel {
     var intensity: ActivityIntensity = .medium
     var saveAsTemplate = false
 
+    /// Set when editing an existing entry so Save overwrites it in place.
+    private(set) var editingID: String?
+    private(set) var editingLoggedAt: Date?
+
+    /// Load an existing strength entry for editing.
+    func load(_ entry: ActivityEntry) {
+        editingID = entry.id
+        editingLoggedAt = entry.loggedAt
+        durationMin = entry.durationMin
+        exercises = entry.details?.strength ?? []
+    }
+
     var canSave: Bool { durationMin > 0 && !exercises.isEmpty }
 
     func addExercise(_ exercise: GymExercise) {
@@ -33,8 +45,11 @@ final class ActivityStrengthViewModel {
     }
 
     func estimatedBurn(weightKg: Double) -> Int {
-        HealthMath.strengthBurn(minutes: durationMin, weightKg: weightKg, intensity: intensity)
+        HealthMath.strengthBurn(exercises: exercises, minutes: durationMin, weightKg: weightKg, intensity: intensity)
     }
+
+    var totalVolumeKg: Double { exercises.reduce(0) { $0 + $1.volumeKg } }
+    var totalSets: Int { exercises.reduce(0) { $0 + $1.sets.count } }
 
     var sessionName: String {
         let groups = Set(exercises.map { $0.exercise.group.label })
@@ -46,10 +61,12 @@ final class ActivityStrengthViewModel {
 
     func makeEntry(weightKg: Double) -> ActivityEntry {
         ActivityEntry(
+            id: editingID ?? UUID().uuidString,
             type: .strength,
             name: sessionName,
             durationMin: durationMin,
             caloriesBurned: estimatedBurn(weightKg: weightKg),
+            loggedAt: editingLoggedAt ?? Date(),
             details: details()
         )
     }
@@ -70,6 +87,10 @@ struct ActivityStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = ActivityStrengthViewModel()
     @State private var showingExercisePicker = false
+    @State private var didLoad = false
+
+    /// When set, the sheet edits this existing entry instead of creating one.
+    var editing: ActivityEntry?
 
     private var system: UnitSystem { user.profile?.unitSystem ?? .metric }
     private var weightKg: Double { user.profile?.currentWeightKg ?? 70 }
@@ -153,25 +174,37 @@ struct ActivityStrengthView: View {
                             .font(.headline)
                             .contentTransition(.numericText())
                     }
+                    if !viewModel.exercises.isEmpty {
+                        LabeledContent("Total volume",
+                                       value: "\(ProfileFormat.decimal.format(ProfileFormat.weightDisplayValue(kg: viewModel.totalVolumeKg, system: system))) \(ProfileFormat.weightUnitLabel(system)) · \(viewModel.totalSets) sets")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     Toggle("Save this workout to reuse", isOn: $viewModel.saveAsTemplate)
                 } footer: {
-                    Text("Sets and reps are recorded for your log. The calorie estimate comes from duration and intensity.")
+                    Text("The estimate is the sum of your session time, total volume (weight times reps), and total reps, so every set you add changes it.")
                 }
             }
-            .navigationTitle("Log strength")
+            .navigationTitle(editing == nil ? "Log strength" : "Edit strength")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
+                    Button(editing == nil ? "Save" : "Update") { save() }
                         .disabled(!viewModel.canSave)
                 }
             }
             .sheet(isPresented: $showingExercisePicker) {
                 GymExercisePicker { exercise in
                     viewModel.addExercise(exercise)
+                }
+            }
+            .onAppear {
+                if let editing, !didLoad {
+                    viewModel.load(editing)
+                    didLoad = true
                 }
             }
         }

@@ -99,6 +99,10 @@ enum ActivityType: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String { rawValue.capitalized }
 
+    /// Types logged through the general workout sheet. Strength and sport have
+    /// their own dedicated loggers, so they are excluded here.
+    static var workoutLoggable: [ActivityType] { [.run, .ride, .swim, .walk, .other] }
+
     var systemImage: String {
         switch self {
         case .run:      "figure.run"

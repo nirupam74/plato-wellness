@@ -21,6 +21,22 @@ final class ActivitySportsViewModel {
     var position: String = ""
     var saveAsTemplate = false
 
+    private(set) var editingID: String?
+    private(set) var editingLoggedAt: Date?
+
+    func load(_ entry: ActivityEntry) {
+        editingID = entry.id
+        editingLoggedAt = entry.loggedAt
+        durationMin = entry.durationMin
+        guard let s = entry.details?.sport else { return }
+        sport = s.sport
+        intensity = s.intensity
+        venue = s.venue
+        isOutdoor = s.isOutdoor
+        participants = s.participants
+        position = s.position
+    }
+
     var canSave: Bool { durationMin > 0 }
 
     func estimatedBurn(weightKg: Double) -> Int {
@@ -40,10 +56,12 @@ final class ActivitySportsViewModel {
 
     func makeEntry(weightKg: Double) -> ActivityEntry {
         ActivityEntry(
+            id: editingID ?? UUID().uuidString,
             type: .sport,
             name: sport.label,
             durationMin: durationMin,
             caloriesBurned: estimatedBurn(weightKg: weightKg),
+            loggedAt: editingLoggedAt ?? Date(),
             details: details()
         )
     }
@@ -69,6 +87,10 @@ struct ActivitySportsView: View {
     @Environment(UserStore.self) private var user
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = ActivitySportsViewModel()
+    @State private var didLoad = false
+
+    /// When set, the sheet edits this existing entry instead of creating one.
+    var editing: ActivityEntry?
 
     private var weightKg: Double { user.profile?.currentWeightKg ?? 70 }
     private var savedSports: [ActivityTemplate] { activity.templates.filter { $0.type == .sport } }
@@ -148,15 +170,21 @@ struct ActivitySportsView: View {
                     Text("Estimated from the sport, duration, and intensity. You can refine it later.")
                 }
             }
-            .navigationTitle("Log sport")
+            .navigationTitle(editing == nil ? "Log sport" : "Edit sport")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
+                    Button(editing == nil ? "Save" : "Update") { save() }
                         .disabled(!viewModel.canSave)
+                }
+            }
+            .onAppear {
+                if let editing, !didLoad {
+                    viewModel.load(editing)
+                    didLoad = true
                 }
             }
         }
