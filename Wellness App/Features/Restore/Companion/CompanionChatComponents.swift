@@ -62,6 +62,7 @@ struct CompanionBubble: View {
 
 /// Three dots that breathe gently while the companion is composing a reply.
 struct CompanionTypingIndicator: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var phase = 0.0
 
     var body: some View {
@@ -85,6 +86,9 @@ struct CompanionTypingIndicator: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .onAppear {
+            // A forever-repeating pulse is exactly the kind of motion Reduce
+            // Motion should stop; leave the dots static and rely on the label.
+            guard !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
                 phase = 1
             }
