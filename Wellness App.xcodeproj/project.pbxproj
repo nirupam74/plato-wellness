@@ -31,16 +31,65 @@
 		B14754C32FFB3224008672E2 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = B14754C22FFB3224008672E2 /* FirebaseRemoteConfig */; };
 		B14754C52FFB3224008672E2 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = B14754C42FFB3224008672E2 /* FirebaseStorage */; };
 		B14754C72FFB3224008672E2 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = B14754C62FFB3224008672E2 /* FirebaseStorageCombine-Community */; };
+		B1A93ADD2FFC2C4500187BB3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1A93ADC2FFC2C4500187BB3 /* WidgetKit.framework */; };
+		B1A93ADF2FFC2C4500187BB3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1A93ADE2FFC2C4500187BB3 /* SwiftUI.framework */; };
+		B1A93AF02FFC2C4800187BB3 /* Wellness WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B1A93ADA2FFC2C4500187BB3 /* Wellness WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B1A93AEE2FFC2C4800187BB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B14752752FFAB739008672E2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B1A93AD92FFC2C4500187BB3;
+			remoteInfo = "Wellness WidgetExtension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B1A93AF52FFC2C4800187BB3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B1A93AF02FFC2C4800187BB3 /* Wellness WidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		B147527D2FFAB739008672E2 /* Wellness App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Wellness App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1A93ADA2FFC2C4500187BB3 /* Wellness WidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Wellness WidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1A93ADC2FFC2C4500187BB3 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		B1A93ADE2FFC2C4500187BB3 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		B1A93AF62FFC34A600187BB3 /* Wellness WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Wellness WidgetExtension.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B1A93AF12FFC2C4800187BB3 /* Exceptions for "Wellness Widget" folder in "Wellness WidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = B1A93AD92FFC2C4500187BB3 /* Wellness WidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B147527F2FFAB739008672E2 /* Wellness App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "Wellness App";
+			sourceTree = "<group>";
+		};
+		B1A93AE02FFC2C4500187BB3 /* Wellness Widget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B1A93AF12FFC2C4800187BB3 /* Exceptions for "Wellness Widget" folder in "Wellness WidgetExtension" target */,
+			);
+			path = "Wellness Widget";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -77,13 +126,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B1A93AD72FFC2C4500187BB3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1A93ADF2FFC2C4500187BB3 /* SwiftUI.framework in Frameworks */,
+				B1A93ADD2FFC2C4500187BB3 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		B14752742FFAB739008672E2 = {
 			isa = PBXGroup;
 			children = (
+				B1A93AF62FFC34A600187BB3 /* Wellness WidgetExtension.entitlements */,
 				B147527F2FFAB739008672E2 /* Wellness App */,
+				B1A93AE02FFC2C4500187BB3 /* Wellness Widget */,
+				B1A93ADB2FFC2C4500187BB3 /* Frameworks */,
 				B147527E2FFAB739008672E2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -92,8 +153,18 @@
 			isa = PBXGroup;
 			children = (
 				B147527D2FFAB739008672E2 /* Wellness App.app */,
+				B1A93ADA2FFC2C4500187BB3 /* Wellness WidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B1A93ADB2FFC2C4500187BB3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B1A93ADC2FFC2C4500187BB3 /* WidgetKit.framework */,
+				B1A93ADE2FFC2C4500187BB3 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -106,10 +177,12 @@
 				B14752792FFAB739008672E2 /* Sources */,
 				B147527A2FFAB739008672E2 /* Frameworks */,
 				B147527B2FFAB739008672E2 /* Resources */,
+				B1A93AF52FFC2C4800187BB3 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B1A93AEF2FFC2C4800187BB3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				B147527F2FFAB739008672E2 /* Wellness App */,
@@ -145,6 +218,28 @@
 			productReference = B147527D2FFAB739008672E2 /* Wellness App.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B1A93AD92FFC2C4500187BB3 /* Wellness WidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1A93AF22FFC2C4800187BB3 /* Build configuration list for PBXNativeTarget "Wellness WidgetExtension" */;
+			buildPhases = (
+				B1A93AD62FFC2C4500187BB3 /* Sources */,
+				B1A93AD72FFC2C4500187BB3 /* Frameworks */,
+				B1A93AD82FFC2C4500187BB3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B1A93AE02FFC2C4500187BB3 /* Wellness Widget */,
+			);
+			name = "Wellness WidgetExtension";
+			packageProductDependencies = (
+			);
+			productName = "Wellness WidgetExtension";
+			productReference = B1A93ADA2FFC2C4500187BB3 /* Wellness WidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -156,6 +251,9 @@
 				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					B147527C2FFAB739008672E2 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					B1A93AD92FFC2C4500187BB3 = {
 						CreatedOnToolsVersion = 26.5;
 					};
 				};
@@ -178,12 +276,20 @@
 			projectRoot = "";
 			targets = (
 				B147527C2FFAB739008672E2 /* Wellness App */,
+				B1A93AD92FFC2C4500187BB3 /* Wellness WidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		B147527B2FFAB739008672E2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1A93AD82FFC2C4500187BB3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -200,7 +306,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B1A93AD62FFC2C4500187BB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B1A93AEF2FFC2C4800187BB3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B1A93AD92FFC2C4500187BB3 /* Wellness WidgetExtension */;
+			targetProxy = B1A93AEE2FFC2C4800187BB3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B14752862FFAB73B008672E2 /* Debug */ = {
@@ -256,7 +377,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -314,7 +435,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -402,6 +523,68 @@
 			};
 			name = Release;
 		};
+		B1A93AF32FFC2C4800187BB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Wellness WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3C35ZDBUYQ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Wellness Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wellness Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.platowellness.app.Wellness-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B1A93AF42FFC2C4800187BB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Wellness WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3C35ZDBUYQ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Wellness Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Wellness Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.platowellness.app.Wellness-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -419,6 +602,15 @@
 			buildConfigurations = (
 				B14752892FFAB73B008672E2 /* Debug */,
 				B147528A2FFAB73B008672E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B1A93AF22FFC2C4800187BB3 /* Build configuration list for PBXNativeTarget "Wellness WidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B1A93AF32FFC2C4800187BB3 /* Debug */,
+				B1A93AF42FFC2C4800187BB3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

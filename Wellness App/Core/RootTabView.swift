@@ -10,6 +10,7 @@ import SwiftUI
 struct RootTabView: View {
     @Environment(AppState.self) private var appState
     @Environment(UserStore.self) private var user
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         @Bindable var appState = appState
@@ -41,6 +42,24 @@ struct RootTabView: View {
         .fullScreenCover(isPresented: .constant(!user.hasCompletedOnboarding)) {
             OnboardingFlowView()
         }
+        .onAppear { syncWidgets() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { syncWidgets() }
+        }
+    }
+
+    /// Apply any water logged from a widget, then publish today's numbers.
+    private func syncWidgets() {
+        let pending = WidgetSync.consumePendingWater()
+        if pending > 0 { appState.restore.addWater(ml: pending) }
+
+        WidgetSync.publish(
+            waterMl: appState.restore.todayWaterMl,
+            waterGoal: user.profile?.targets.waterMl ?? 2000,
+            calories: appState.nutrition.totals(on: Date()).calories,
+            calorieTarget: user.profile?.targets.calories ?? 0,
+            steps: appState.activity.todaySteps
+        )
     }
 }
 
