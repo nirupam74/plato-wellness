@@ -157,6 +157,17 @@ final class UserStore {
         addMeasurement(BodyMeasurement(weightKg: kg, recordedAt: date))
     }
 
+    /// Delete a measurement. We intentionally do not recompute currentWeightKg:
+    /// the profile weight is set explicitly and should not silently jump because
+    /// a historical entry was removed.
+    func removeMeasurement(_ measurement: BodyMeasurement) {
+        if let uid {
+            try? db.collection("users/\(uid)/measurements").document(measurement.id).delete()
+        } else {
+            measurements.removeAll { $0.id == measurement.id }
+        }
+    }
+
     // MARK: - Progress photos
 
     /// Upload image bytes to Storage and record the download URL in Firestore.

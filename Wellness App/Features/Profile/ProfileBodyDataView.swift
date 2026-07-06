@@ -26,6 +26,7 @@ struct ProfileBodyDataView: View {
             measurementSection
             if hasBodyFat { bodyFatSection }
             latestSection
+            historySection
             photosSection
         }
         .navigationTitle("Body data")
@@ -213,6 +214,45 @@ struct ProfileBodyDataView: View {
                     message: "Tap the plus button to log your first measurement."
                 )
             }
+        }
+    }
+
+    // MARK: - History
+
+    @ViewBuilder private var historySection: some View {
+        if user.measurements.count > 1 {
+            Section("History") {
+                ForEach(user.measurements) { m in
+                    HStack {
+                        Text(m.recordedAt.formatted(date: .abbreviated, time: .omitted))
+                        Spacer()
+                        Text(historySummary(m))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+                .onDelete(perform: deleteMeasurements)
+            }
+        }
+    }
+
+    /// A short one-line description of a measurement for the history rows.
+    private func historySummary(_ m: BodyMeasurement) -> String {
+        if let kg = m.weightKg {
+            let value = ProfileFormat.weightDisplayValue(kg: kg, system: system)
+            return ProfileFormat.decimal.format(value) + " " + ProfileFormat.weightUnitLabel(system)
+        }
+        if let bf = m.bodyFatPercent {
+            return String(format: "%.1f%% body fat", bf)
+        }
+        return "Measurement"
+    }
+
+    private func deleteMeasurements(at offsets: IndexSet) {
+        let all = user.measurements
+        for index in offsets {
+            user.removeMeasurement(all[index])
         }
     }
 
