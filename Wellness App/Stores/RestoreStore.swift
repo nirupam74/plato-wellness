@@ -48,16 +48,16 @@ final class RestoreStore {
         }
         func col(_ name: String) -> CollectionReference { db.collection("users/\(uid)/\(name)") }
 
-        listeners.append(col("waterEntries").addSnapshotListener { [weak self] snap, _ in
+        listeners.append(col("waterEntries").order(by: "loggedAt", descending: true).limit(to: 800).addSnapshotListener { [weak self] snap, _ in
             self?.waterEntries = snap?.documents.compactMap { try? $0.data(as: WaterEntry.self) } ?? []
         })
-        listeners.append(col("sleepEntries").addSnapshotListener { [weak self] snap, _ in
+        listeners.append(col("sleepEntries").order(by: "wakeTime", descending: true).limit(to: 400).addSnapshotListener { [weak self] snap, _ in
             self?.sleepEntries = snap?.documents.compactMap { try? $0.data(as: SleepEntry.self) } ?? []
         })
-        listeners.append(col("moodEntries").addSnapshotListener { [weak self] snap, _ in
+        listeners.append(col("moodEntries").order(by: "loggedAt", descending: true).limit(to: 400).addSnapshotListener { [weak self] snap, _ in
             self?.moodEntries = snap?.documents.compactMap { try? $0.data(as: MoodEntry.self) } ?? []
         })
-        listeners.append(col("restoreSessions").addSnapshotListener { [weak self] snap, _ in
+        listeners.append(col("restoreSessions").order(by: "completedAt", descending: true).limit(to: 400).addSnapshotListener { [weak self] snap, _ in
             self?.sessions = snap?.documents.compactMap { try? $0.data(as: RestoreSession.self) } ?? []
         })
         listeners.append(col("skincareRoutine").addSnapshotListener { [weak self] snap, _ in

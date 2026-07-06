@@ -38,10 +38,13 @@ final class ActivityStore {
         // Steps and active energy come from HealthKit, wired later.
         dailySummaries = []
         listeners.append(
-            db.collection("users/\(uid)/activityEntries").addSnapshotListener { [weak self] snap, _ in
-                guard let snap else { return }
-                self?.entries = snap.documents.compactMap { try? $0.data(as: ActivityEntry.self) }
-            }
+            db.collection("users/\(uid)/activityEntries")
+                .order(by: "loggedAt", descending: true)
+                .limit(to: 800)
+                .addSnapshotListener { [weak self] snap, _ in
+                    guard let snap else { return }
+                    self?.entries = snap.documents.compactMap { try? $0.data(as: ActivityEntry.self) }
+                }
         )
     }
 

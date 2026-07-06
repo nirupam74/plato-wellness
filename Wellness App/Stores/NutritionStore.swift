@@ -40,10 +40,13 @@ final class NutritionStore {
             return
         }
         listeners.append(
-            db.collection("users/\(uid)/foodEntries").addSnapshotListener { [weak self] snap, _ in
-                guard let snap else { return }
-                self?.entries = snap.documents.compactMap { try? $0.data(as: FoodEntry.self) }
-            }
+            db.collection("users/\(uid)/foodEntries")
+                .order(by: "loggedAt", descending: true)
+                .limit(to: 800)
+                .addSnapshotListener { [weak self] snap, _ in
+                    guard let snap else { return }
+                    self?.entries = snap.documents.compactMap { try? $0.data(as: FoodEntry.self) }
+                }
         )
         listeners.append(
             db.collection("users/\(uid)/customFoods").addSnapshotListener { [weak self] snap, _ in
