@@ -13,6 +13,8 @@ import SwiftUI
 struct ProfileGoalsView: View {
     @Environment(UserStore.self) private var user
     @State private var viewModel = ProfileGoalsViewModel()
+    @State private var newAllergy = ""
+    @State private var newFood = ""
 
     private var system: UnitSystem { user.profile?.unitSystem ?? .metric }
 
@@ -30,6 +32,9 @@ struct ProfileGoalsView: View {
                 recomputeSection
                 targetsSection
                 wellnessSection
+                dietaryPreferencesSection
+                allergiesSection
+                foodsToAvoidSection
             }
         }
         .navigationTitle("Goals & targets")
@@ -162,6 +167,101 @@ struct ProfileGoalsView: View {
             Stepper(value: user.profileBinding(\.wellnessGoals.workoutDaysPerWeek, default: 3), in: 0...7) {
                 LabeledContent("Workout days / week", value: "\(user.profile?.wellnessGoals.workoutDaysPerWeek ?? 0)")
             }
+        }
+    }
+
+    // MARK: - Dietary preferences
+
+    private var dietaryPreferencesSection: some View {
+        Section {
+            Picker("Diet", selection: user.profileBinding(\.dietType, default: .none)) {
+                ForEach(DietType.allCases) { diet in
+                    Text(diet.label).tag(diet)
+                }
+            }
+        } header: {
+            Text("Dietary preferences")
+        } footer: {
+            Text("Your food logging and companion use these. Keep allergies up to date.")
+        }
+    }
+
+    private var allergiesSection: some View {
+        Section("Allergies") {
+            let items = user.profile?.allergies ?? []
+            if items.isEmpty {
+                Text("No allergies added")
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(items, id: \.self) { item in
+                Text(item)
+            }
+            .onDelete(perform: deleteAllergies)
+            addRow(text: $newAllergy, placeholder: "Add an allergy", add: addAllergy)
+        }
+    }
+
+    private var foodsToAvoidSection: some View {
+        Section("Foods to avoid") {
+            let items = user.profile?.foodsToAvoid ?? []
+            if items.isEmpty {
+                Text("No foods added")
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(items, id: \.self) { item in
+                Text(item)
+            }
+            .onDelete(perform: deleteFoods)
+            addRow(text: $newFood, placeholder: "Add a food", add: addFood)
+        }
+    }
+
+    private func addRow(text: Binding<String>, placeholder: String, add: @escaping () -> Void) -> some View {
+        HStack {
+            TextField(placeholder, text: text)
+                .submitLabel(.done)
+                .onSubmit(add)
+            Button(action: add) {
+                Image(systemName: "plus.circle.fill")
+            }
+            .disabled(text.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .accessibilityLabel(placeholder)
+        }
+    }
+
+    private func addAllergy() {
+        let value = newAllergy.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        user.update { profile in
+            if !profile.allergies.contains(where: { $0.caseInsensitiveCompare(value) == .orderedSame }) {
+                profile.allergies.append(value)
+            }
+        }
+        newAllergy = ""
+    }
+
+    private func deleteAllergies(at offsets: IndexSet) {
+        user.update { $0.allergies.remove(atOffsets: offsets) }
+    }
+
+    private func addFood() {
+        let value = newFood.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        user.update { profile in
+            var list = profile.foodsToAvoid ?? []
+            if !list.contains(where: { $0.caseInsensitiveCompare(value) == .orderedSame }) {
+                list.append(value)
+                profile.foodsToAvoid = list
+            }
+        }
+        newFood = ""
+    }
+
+    private func deleteFoods(at offsets: IndexSet) {
+        user.update { profile in
+            var list = profile.foodsToAvoid ?? []
+            list.remove(atOffsets: offsets)
+            profile.foodsToAvoid = list.isEmpty ? nil : list
         }
     }
 
