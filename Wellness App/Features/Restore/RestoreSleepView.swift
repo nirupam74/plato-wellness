@@ -12,7 +12,9 @@ import Charts
 struct RestoreSleepView: View {
     @Environment(RestoreStore.self) private var restore
     @Environment(UserStore.self) private var user
+    @Environment(AppState.self) private var appState
     @State private var showingLog = false
+    @State private var isImporting = false
 
     private var goalHours: Double { user.profile?.wellnessGoals.sleepHours ?? 8 }
     private var latest: SleepEntry? { restore.latestSleep }
@@ -135,18 +137,31 @@ struct RestoreSleepView: View {
         Card {
             VStack(alignment: .leading, spacing: 8) {
                 SectionHeaderRow("Apple Health")
-                Text("Importing sleep from Apple Health is coming in a later update. For now, add nights manually.")
+                Text("Pull your recent nights from Apple Health. You can still add or adjust any night manually.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 Button {
-                    // Stub: HealthKit import wires in during a later phase.
+                    Task {
+                        isImporting = true
+                        await appState.syncHealthKit()
+                        isImporting = false
+                    }
                 } label: {
-                    Label("Import from Apple Health", systemImage: "heart.text.square")
-                        .frame(maxWidth: .infinity)
+                    Group {
+                        if isImporting {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                Text("Importing...")
+                            }
+                        } else {
+                            Label("Import from Apple Health", systemImage: "heart.text.square")
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
-                .disabled(true)
+                .disabled(isImporting)
             }
         }
     }
