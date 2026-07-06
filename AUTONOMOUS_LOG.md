@@ -25,3 +25,4 @@ change.
 | 2026-07-06 00:05 | self-directed | Per-bar VoiceOver accessibility on steps + active-energy charts (date + value per day, navigable) | 62c4243 |
 | 2026-07-06 00:11 | self-directed | Per-mark VoiceOver a11y on sleep (bars) + mood (points) trend charts | bc4c283 |
 | 2026-07-06 00:17 | self-directed | Wired the sleep view Apple Health import button to real syncHealthKit (was a stale disabled stub) | 3bcd981 |
+| 2026-07-06 00:23 | self-directed | Per-point VoiceOver a11y on weight, measurement, and body-fat trend charts (ProfileBodyDataView) | 5fcb9a0 |
