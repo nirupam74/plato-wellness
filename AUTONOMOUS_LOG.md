@@ -18,3 +18,4 @@ change.
 | 10 | 2026-07-05 | ios | Nutrition, Activity, Restore | Self-directed: haptic feedback on food, workout, sport, and mood logging. | ✓ build |
 | 11 | 2026-07-05 | ios | UserStore | Self-directed: bounded the progress-photos Firestore listener (order + limit). | ✓ build |
 | 12 | 2026-07-05 | ios | Components | Self-directed: StatTile combines into one VoiceOver element with accessibilityValue. | ✓ build |
+| 13 | 2026-07-05 | ios, healthkit | ActivityView | Self-directed: pull-to-refresh on Activity re-syncs HealthKit. | ✓ build |

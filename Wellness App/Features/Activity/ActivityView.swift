@@ -12,6 +12,7 @@ import SwiftUI
 struct ActivityView: View {
     @Environment(ActivityStore.self) private var activity
     @Environment(UserStore.self) private var user
+    @Environment(AppState.self) private var appState
     @State private var viewModel = ActivityViewModel()
 
     private var recentEntries: [ActivityEntry] {
@@ -45,6 +46,7 @@ struct ActivityView: View {
                 workoutsSection
             }
             .listStyle(.insetGrouped)
+            .refreshable { await appState.syncHealthKit() }
             .navigationTitle("Activity")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
