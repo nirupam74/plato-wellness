@@ -20,6 +20,11 @@ struct ProfileLogWeightView: View {
 
     private var system: UnitSystem { user.profile?.unitSystem ?? .metric }
 
+    /// Weight in kg. A sane range keeps a fat-fingered entry (e.g. 700 for 70)
+    /// from feeding a nonsensical value into the BMR and calorie targets.
+    private var weightKg: Double { ProfileFormat.kg(fromDisplayWeight: weight, system: system) }
+    private var isWeightSane: Bool { (20...500).contains(weightKg) }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -31,6 +36,11 @@ struct ProfileLogWeightView: View {
                             .foregroundStyle(.secondary)
                     }
                     DatePicker("Date", selection: $date, in: ...Date(), displayedComponents: .date)
+                    if weightKg > 0 && !isWeightSane {
+                        Text("Enter a realistic body weight.")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
                 }
 
                 if let current = user.profile?.currentWeightKg {
@@ -50,7 +60,7 @@ struct ProfileLogWeightView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { save() }
-                        .disabled(weight <= 0)
+                        .disabled(!isWeightSane)
                 }
             }
             .onAppear {
