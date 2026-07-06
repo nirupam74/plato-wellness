@@ -22,6 +22,8 @@ struct UserProfile: Codable, Identifiable {
     var weeklyRateKg: Double?
     var dietType: DietType
     var allergies: [String]
+    // Optional so profiles saved before this field existed still decode.
+    var foodsToAvoid: [String]?
     var targets: DailyTargets
     var wellnessGoals: WellnessGoals
     var companionContextConsent: Bool
@@ -41,6 +43,7 @@ struct UserProfile: Codable, Identifiable {
         weeklyRateKg: Double? = nil,
         dietType: DietType = .none,
         allergies: [String] = [],
+        foodsToAvoid: [String]? = nil,
         targets: DailyTargets,
         wellnessGoals: WellnessGoals,
         companionContextConsent: Bool = false,
@@ -59,6 +62,7 @@ struct UserProfile: Codable, Identifiable {
         self.weeklyRateKg = weeklyRateKg
         self.dietType = dietType
         self.allergies = allergies
+        self.foodsToAvoid = foodsToAvoid
         self.targets = targets
         self.wellnessGoals = wellnessGoals
         self.companionContextConsent = companionContextConsent

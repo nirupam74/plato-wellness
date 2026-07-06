@@ -315,6 +315,7 @@ final class OnboardingViewModel {
             weeklyRateKg: goalNeedsTarget ? weeklyRateKg : nil,
             dietType: dietType,
             allergies: allergies,
+            foodsToAvoid: foodsToAvoid.isEmpty ? nil : foodsToAvoid,
             targets: targets,
             wellnessGoals: wellness,
             companionContextConsent: companionContextConsent
