@@ -30,3 +30,4 @@ change.
 | 2026-07-06 00:36 | self-directed | MetricRing honors system Reduce Motion (no ring animation when enabled) | aed9f1f |
 | 2026-07-06 00:42 | self-directed | Session countdown timer scales with Dynamic Type (ScaledMetric + minimumScaleFactor); confirmed other .system(size:) uses are decorative SF Symbols | 06eb072 |
 | 2026-07-06 00:49 | self-directed | Companion chat welcome/empty state: personalized greeting + tappable conversation starters (fills draft, not auto-send) | 88ed300 |
+| 2026-07-06 00:55 | self-directed | Companion chat honors Reduce Motion (crisis card fade vs slide, unanimated state change, non-animated scroll) | 032aba9 |
