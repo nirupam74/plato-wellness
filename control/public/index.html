@@ -113,16 +113,16 @@
 
   <!-- DEPLOY -->
   <section class="card col-wide">
-    <h2>Deploy staged changes <span class="count">inactive</span></h2>
+    <h2>Deploy to Firebase <span class="count" style="color:var(--red);border-color:#5a2424">production</span></h2>
     <div class="body">
-      <p class="muted">No backend is wired yet — Firebase, HealthKit, and Auth are stubbed, so there is nothing to deploy. This panel lights up once a Firebase project exists: add its targets to <code>ALLOW</code> in <code>control/server.js</code> (for example <code>firestore:rules</code>, <code>storage</code>, <code>functions</code>, <code>hosting:app</code>) and uncheck the disabled state below.</p>
+      <p class="muted">Deploys to the live project <code>wellness-app-4b33d7</code> using the <code>firebase</code> CLI. Rules and Storage are fast; <b>Cloud Functions</b> take a couple of minutes and read the <code>ANTHROPIC_API_KEY</code> secret at runtime.</p>
       <div class="row">
-        <label class="ck"><input type="checkbox" class="dt" value="firestore:rules" disabled> Firestore rules</label>
-        <label class="ck"><input type="checkbox" class="dt" value="storage" disabled> Storage rules</label>
-        <label class="ck"><input type="checkbox" class="dt" value="functions" disabled> Cloud Functions</label>
-        <label class="ck"><input type="checkbox" class="dt" value="hosting:app" disabled> Web app</label>
+        <label class="ck"><input type="checkbox" class="dt" value="firestore:rules" checked> Firestore rules</label>
+        <label class="ck"><input type="checkbox" class="dt" value="firestore:indexes"> Firestore indexes</label>
+        <label class="ck"><input type="checkbox" class="dt" value="storage" checked> Storage rules</label>
+        <label class="ck"><input type="checkbox" class="dt" value="functions"> Cloud Functions</label>
       </div>
-      <div class="row"><button id="deployBtn" class="danger" disabled>⚠ Deploy selected to production</button><span id="deployMsg" class="muted">disabled until a backend is connected</span></div>
+      <div class="row"><button id="deployBtn" class="danger">⚠ Deploy selected to production</button><span id="deployMsg" class="muted"></span></div>
       <pre id="deployOut" class="diff"></pre>
     </div>
   </section>

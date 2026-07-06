@@ -230,16 +230,12 @@ async function api(req, res, url) {
   // button + confirm) — the autonomous loop never calls this. Targets are
   // allow-listed so the button can't deploy anything unexpected.
   //
-  // ALLOW is intentionally EMPTY for now: the Wellness app has no backend wired
-  // yet (Firebase, HealthKit, Auth are stubbed). Once a Firebase project exists,
-  // add its targets here, e.g. 'firestore:rules', 'storage', 'functions',
-  // 'hosting:app', and the deploy button lights up.
+  // Live deploy targets for the Wellness Firebase project (wellness-app-4b33d7).
+  // Deploys use the CLI with cwd = repo root, which reads .firebaserc for the
+  // project. Functions read the ANTHROPIC_API_KEY secret at runtime.
   if (p === '/api/deploy' && req.method === 'POST') {
     const body = await readBody(req);
-    const ALLOW = [];
-    if (!ALLOW.length) {
-      return json(res, 400, { error: 'Deploy is not configured yet. There is no backend wired (Firebase/HealthKit/Auth are stubbed). Add targets to ALLOW in control/server.js once a backend exists.' });
-    }
+    const ALLOW = ['firestore:rules', 'firestore:indexes', 'storage', 'functions'];
     const targets = (Array.isArray(body.targets) ? body.targets : []).filter((t) => ALLOW.includes(t));
     if (!targets.length) return json(res, 400, { error: 'no valid deploy targets selected' });
     execFile('firebase', ['deploy', '--only', targets.join(','), '--non-interactive'],
