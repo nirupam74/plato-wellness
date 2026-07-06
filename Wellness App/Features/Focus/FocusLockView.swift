@@ -42,6 +42,16 @@ struct FocusLockView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section {
+                NavigationLink {
+                    ProductiveFeedView()
+                } label: {
+                    Label("Try the productive feed", systemImage: "brain.head.profile")
+                }
+            } footer: {
+                Text("Craving a scroll? Swap it for a reel of quick lessons, topics, and free books.")
+            }
+
             if !focus.isAuthorized {
                 Section {
                     Button {

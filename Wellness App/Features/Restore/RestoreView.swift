@@ -139,6 +139,11 @@ private struct RestoreRitualLinks: View {
             } label: {
                 RestoreRitualRow(title: "Focus lock", subtitle: focusSubtitle, systemImage: "lock.shield.fill")
             }
+            NavigationLink {
+                ProductiveFeedView()
+            } label: {
+                RestoreRitualRow(title: "Productive feed", subtitle: "Learn instead of doomscrolling", systemImage: "brain.head.profile")
+            }
         }
         .buttonStyle(.plain)
     }
