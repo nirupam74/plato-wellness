@@ -15,6 +15,9 @@ struct RestoreSessionTimerView: View {
     @State private var viewModel: RestoreSessionTimerViewModel
     @State private var recorded = false
 
+    // Scales the countdown with Dynamic Type from a 48pt base.
+    @ScaledMetric(relativeTo: .largeTitle) private var timerFontSize: CGFloat = 48
+
     private let type: SessionType
     private let name: String
     private let detail: String
@@ -49,7 +52,9 @@ struct RestoreSessionTimerView: View {
                     .frame(width: 240, height: 240)
                 VStack(spacing: 4) {
                     Text(viewModel.isComplete ? "Done" : viewModel.remainingText)
-                        .font(.system(size: 48, weight: .bold, design: .rounded).monospacedDigit())
+                        .font(.system(size: timerFontSize, weight: .bold, design: .rounded).monospacedDigit())
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                     Text(viewModel.isComplete ? "Session complete" : "remaining")
                         .font(.caption)
                         .foregroundStyle(.secondary)
