@@ -19,6 +19,8 @@ final class ActivitySportsViewModel {
     var isOutdoor: Bool = true
     var participants: Int = 0
     var position: String = ""
+    var stats: [String: Int] = [:]
+    let feedback = SessionFeedbackDraft()
     var saveAsTemplate = false
 
     private(set) var editingID: String?
@@ -28,6 +30,7 @@ final class ActivitySportsViewModel {
         editingID = entry.id
         editingLoggedAt = entry.loggedAt
         durationMin = entry.durationMin
+        feedback.load(entry.details?.feedback)
         guard let s = entry.details?.sport else { return }
         sport = s.sport
         intensity = s.intensity
@@ -35,6 +38,7 @@ final class ActivitySportsViewModel {
         isOutdoor = s.isOutdoor
         participants = s.participants
         position = s.position
+        stats = s.stats ?? [:]
     }
 
     var canSave: Bool { durationMin > 0 }
@@ -43,15 +47,21 @@ final class ActivitySportsViewModel {
         HealthMath.sportBurn(sport: sport, minutes: durationMin, weightKg: weightKg, intensity: intensity)
     }
 
-    private func details() -> ActivityDetails {
-        ActivityDetails(sport: SportDetails(
+    private func sportDetail() -> SportDetails {
+        let kept = stats.filter { sport.statFields.contains($0.key) && $0.value != 0 }
+        return SportDetails(
             sport: sport,
             intensity: intensity,
             venue: venue,
             isOutdoor: isOutdoor,
             participants: max(0, participants),
-            position: position.trimmingCharacters(in: .whitespacesAndNewlines)
-        ))
+            position: position.trimmingCharacters(in: .whitespacesAndNewlines),
+            stats: kept.isEmpty ? nil : kept
+        )
+    }
+
+    private func details() -> ActivityDetails {
+        ActivityDetails(sport: sportDetail(), feedback: feedback.model())
     }
 
     func makeEntry(weightKg: Double) -> ActivityEntry {
@@ -67,7 +77,11 @@ final class ActivitySportsViewModel {
     }
 
     func makeTemplate() -> ActivityTemplate {
-        ActivityTemplate(name: sport.label, type: .sport, durationMin: durationMin, details: details())
+        // Templates capture the setup, not per-session stats or feedback.
+        var setup = sportDetail()
+        setup.stats = nil
+        return ActivityTemplate(name: sport.label, type: .sport, durationMin: durationMin,
+                                details: ActivityDetails(sport: setup))
     }
 
     func apply(_ template: ActivityTemplate) {
@@ -88,6 +102,7 @@ struct ActivitySportsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = ActivitySportsViewModel()
     @State private var didLoad = false
+    @State private var reminder: ActivityAdvisory?
 
     /// When set, the sheet edits this existing entry instead of creating one.
     var editing: ActivityEntry?
@@ -98,6 +113,10 @@ struct ActivitySportsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let reminder {
+                    Section { ActivityAdvisoryBanner(advisory: reminder) }
+                }
+
                 if !savedSports.isEmpty {
                     Section("Saved sports") {
                         ForEach(savedSports) { template in
@@ -117,7 +136,7 @@ struct ActivitySportsView: View {
 
                 Section("Sport") {
                     Picker("Sport", selection: $viewModel.sport) {
-                        ForEach(Sport.allCases) { sport in
+                        ForEach(Sport.selectable) { sport in
                             Label(sport.label, systemImage: sport.systemImage).tag(sport)
                         }
                     }
@@ -139,7 +158,7 @@ struct ActivitySportsView: View {
 
                 Section("Where") {
                     Picker("Venue", selection: $viewModel.venue) {
-                        ForEach(SportVenue.allCases) { venue in
+                        ForEach(SportVenue.selectable) { venue in
                             Text(venue.label).tag(venue)
                         }
                     }
@@ -155,6 +174,23 @@ struct ActivitySportsView: View {
                         TextField("Position", text: $viewModel.position, prompt: Text("Forward, guard, pitcher..."))
                     }
                 }
+
+                if !viewModel.sport.statFields.isEmpty {
+                    Section("Your stats") {
+                        ForEach(viewModel.sport.statFields, id: \.self) { field in
+                            HStack {
+                                Text(field)
+                                Spacer()
+                                TextField("0", value: statBinding(field), format: .number)
+                                    .keyboardType(.numberPad)
+                                    .multilineTextAlignment(.trailing)
+                                    .frame(maxWidth: 80)
+                            }
+                        }
+                    }
+                }
+
+                SessionFeedbackSection(draft: viewModel.feedback)
 
                 Section {
                     HStack {
@@ -186,6 +222,10 @@ struct ActivitySportsView: View {
                     viewModel.load(editing)
                     didLoad = true
                 }
+                if reminder == nil, editing == nil, let r = activity.pendingReminder(for: .sport) {
+                    reminder = r
+                    activity.markReminded(r)
+                }
             }
         }
         .tint(Theme.activity)
@@ -198,11 +238,21 @@ struct ActivitySportsView: View {
         return "\(template.name) · \(template.durationMin) min"
     }
 
+    private func statBinding(_ field: String) -> Binding<Int> {
+        Binding(
+            get: { viewModel.stats[field] ?? 0 },
+            set: { viewModel.stats[field] = max(0, $0) }
+        )
+    }
+
     private func save() {
         activity.add(viewModel.makeEntry(weightKg: weightKg))
         if viewModel.saveAsTemplate {
             activity.saveTemplate(viewModel.makeTemplate())
         }
+        activity.recordAdvisories(from: viewModel.feedback.model(),
+                                  activityType: .sport,
+                                  sportRaw: viewModel.sport.rawValue)
         Haptics.success()
         dismiss()
     }

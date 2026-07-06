@@ -100,8 +100,8 @@ enum ActivityType: String, Codable, CaseIterable, Identifiable {
     var label: String { rawValue.capitalized }
 
     /// Types logged through the general workout sheet. Strength and sport have
-    /// their own dedicated loggers, so they are excluded here.
-    static var workoutLoggable: [ActivityType] { [.run, .ride, .swim, .walk, .other] }
+    /// their own dedicated loggers, and the catch-all "other" is not offered.
+    static var workoutLoggable: [ActivityType] { [.run, .ride, .swim, .walk] }
 
     var systemImage: String {
         switch self {

@@ -23,6 +23,8 @@ final class ActivityLogWorkoutViewModel {
     var lapsText: String = ""
     var swimIntensity: ActivityIntensity = .medium
 
+    let feedback = SessionFeedbackDraft()
+
     // Set when editing an existing entry so Save overwrites it in place.
     private(set) var editingID: String?
     private(set) var editingLoggedAt: Date?
@@ -41,6 +43,7 @@ final class ActivityLogWorkoutViewModel {
         caloriesBurned = entry.caloriesBurned
         distanceText = entry.distanceKm.map { String(format: "%.2f", $0) } ?? ""
         heartRateText = entry.avgHeartRate.map(String.init) ?? ""
+        feedback.load(entry.details?.feedback)
         if let swim = entry.details?.swim {
             poolType = swim.poolType
             poolLengthText = swim.poolLengthM.map(String.init) ?? ""
@@ -87,15 +90,15 @@ final class ActivityLogWorkoutViewModel {
         }
     }
 
-    private func swimDetails() -> ActivityDetails? {
-        guard isSwim else { return nil }
-        let length = Int(poolLengthText)
-        return ActivityDetails(swim: SwimDetails(
+    private func details() -> ActivityDetails? {
+        let swim: SwimDetails? = isSwim ? SwimDetails(
             poolType: poolType,
-            poolLengthM: length.flatMap { $0 > 0 ? $0 : nil },
+            poolLengthM: Int(poolLengthText).flatMap { $0 > 0 ? $0 : nil },
             laps: Int(lapsText).flatMap { $0 > 0 ? $0 : nil },
             intensity: swimIntensity
-        ))
+        ) : nil
+        let result = ActivityDetails(swim: swim, feedback: feedback.model())
+        return result.isEmpty ? nil : result
     }
 
     func makeEntry() -> ActivityEntry {
@@ -112,7 +115,7 @@ final class ActivityLogWorkoutViewModel {
             distanceKm: distance.flatMap { $0 > 0 ? $0 : nil },
             avgHeartRate: Int(heartRateText).flatMap { $0 > 0 ? $0 : nil },
             loggedAt: editingLoggedAt ?? Date(),
-            details: swimDetails()
+            details: details()
         )
     }
 }
@@ -123,6 +126,7 @@ struct ActivityLogWorkoutView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = ActivityLogWorkoutViewModel()
     @State private var didLoad = false
+    @State private var reminder: ActivityAdvisory?
 
     /// When set, the sheet edits this existing entry instead of creating one.
     var editing: ActivityEntry?
@@ -132,6 +136,10 @@ struct ActivityLogWorkoutView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let reminder {
+                    Section { ActivityAdvisoryBanner(advisory: reminder) }
+                }
+
                 Section("Activity") {
                     Picker("Type", selection: $viewModel.type) {
                         ForEach(ActivityType.workoutLoggable) { type in
@@ -229,6 +237,8 @@ struct ActivityLogWorkoutView: View {
                         Text("bpm").foregroundStyle(.secondary)
                     }
                 }
+
+                SessionFeedbackSection(draft: viewModel.feedback)
             }
             .navigationTitle(editing == nil ? "Log workout" : "Edit workout")
             .navigationBarTitleDisplayMode(.inline)
@@ -237,12 +247,8 @@ struct ActivityLogWorkoutView: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(editing == nil ? "Save" : "Update") {
-                        activity.add(viewModel.makeEntry())
-                        Haptics.success()
-                        dismiss()
-                    }
-                    .disabled(!viewModel.canSave)
+                    Button(editing == nil ? "Save" : "Update") { save() }
+                        .disabled(!viewModel.canSave)
                 }
             }
             .onAppear {
@@ -251,8 +257,24 @@ struct ActivityLogWorkoutView: View {
                     didLoad = true
                 }
             }
+            .onChange(of: viewModel.type, initial: true) { _, newType in
+                guard editing == nil else { return }
+                if let r = activity.pendingReminder(for: newType) {
+                    reminder = r
+                    activity.markReminded(r)
+                } else if reminder?.activityType != newType {
+                    reminder = nil
+                }
+            }
         }
         .tint(Theme.activity)
+    }
+
+    private func save() {
+        activity.add(viewModel.makeEntry())
+        activity.recordAdvisories(from: viewModel.feedback.model(), activityType: viewModel.type)
+        Haptics.success()
+        dismiss()
     }
 }
 

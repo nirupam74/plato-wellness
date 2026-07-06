@@ -25,6 +25,7 @@ service cloud.firestore {
       match /recipes/{doc}         { allow read, write: if isOwner(uid); }
       match /activityEntries/{doc}    { allow read, write: if isOwner(uid); }
       match /activityTemplates/{doc}  { allow read, write: if isOwner(uid); }
+      match /activityAdvisories/{doc} { allow read, write: if isOwner(uid); }
       match /waterEntries/{doc}    { allow read, write: if isOwner(uid); }
       match /sleepEntries/{doc}    { allow read, write: if isOwner(uid); }
       match /moodEntries/{doc}     { allow read, write: if isOwner(uid); }

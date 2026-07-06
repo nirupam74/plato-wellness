@@ -142,11 +142,36 @@ enum Sport: String, Codable, CaseIterable, Identifiable {
         case .other:           7.0
         }
     }
+
+    /// Sports offered in the picker. `other` stays in the enum for decoding old
+    /// entries but is no longer selectable.
+    static var selectable: [Sport] { allCases.filter { $0 != .other } }
+
+    /// Sport-specific stat fields the user can record for this sport. Empty for
+    /// sports where per-game box-score stats do not apply.
+    var statFields: [String] {
+        switch self {
+        case .basketball:      return ["Points", "Rebounds", "Assists", "Steals", "Blocks"]
+        case .soccer:          return ["Goals", "Assists", "Shots", "Saves"]
+        case .americanFootball:return ["Touchdowns", "Yards", "Tackles"]
+        case .baseball, .softball: return ["Hits", "Runs", "RBIs", "Strikeouts"]
+        case .volleyball:      return ["Kills", "Blocks", "Aces", "Digs"]
+        case .iceHockey, .fieldHockey: return ["Goals", "Assists", "Shots", "Saves"]
+        case .cricket:         return ["Runs", "Wickets", "Catches"]
+        case .rugby:           return ["Tries", "Tackles"]
+        case .lacrosse:        return ["Goals", "Assists", "Ground balls"]
+        case .handball:        return ["Goals", "Assists", "Saves"]
+        case .tennis, .badminton, .tableTennis, .squash, .racquetball, .pickleball:
+            return ["Sets won", "Games won", "Aces"]
+        case .golf:            return ["Score", "Putts"]
+        default:               return []
+        }
+    }
 }
 
 /// Where a sport was played.
 enum SportVenue: String, Codable, CaseIterable, Identifiable {
-    case court, field, gym, park, driveway, home, rink, studio, other
+    case court, field, gym, park, driveway, home, rink, studio, beach, track, other
     var id: String { rawValue }
     var label: String {
         switch self {
@@ -158,9 +183,14 @@ enum SportVenue: String, Codable, CaseIterable, Identifiable {
         case .home:     "Home"
         case .rink:     "Rink"
         case .studio:   "Studio"
+        case .beach:    "Beach"
+        case .track:    "Track"
         case .other:    "Other"
         }
     }
+
+    /// Venues offered in the picker (`other` kept only for decoding).
+    static var selectable: [SportVenue] { allCases.filter { $0 != .other } }
 }
 
 /// Context captured for a sport session, all optional and refine the estimate.
@@ -171,6 +201,8 @@ struct SportDetails: Codable {
     var isOutdoor: Bool
     var participants: Int   // people you played with (0 = solo / practice)
     var position: String    // free text; only meaningful when sport.usesPosition
+    // Per-sport box-score stats keyed by field label (e.g. "Points": 20).
+    var stats: [String: Int]?
 }
 
 // MARK: - Swim
@@ -337,6 +369,75 @@ struct StrengthEntry: Codable, Identifiable {
     var volumeKg: Double { sets.reduce(0) { $0 + $1.weightKg * Double($1.reps) } }
 }
 
+// MARK: - Session feedback
+
+enum SessionDifficulty: String, Codable, CaseIterable, Identifiable {
+    case veryEasy, easy, moderate, hard, maxEffort
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .veryEasy:  "Very easy"
+        case .easy:      "Easy"
+        case .moderate:  "Moderate"
+        case .hard:      "Hard"
+        case .maxEffort: "All out"
+        }
+    }
+}
+
+/// The kind of issue a person can flag after a session. Injury, stiffness, and
+/// breathing all trigger a rest recommendation and a next-time reminder.
+enum IssueKind: String, Codable, CaseIterable, Identifiable {
+    case injury, stiffness, breathing, other
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .injury:    "Injury or pain"
+        case .stiffness: "Stiff or uneasy movement"
+        case .breathing: "Breathing difficulty"
+        case .other:     "Something else"
+        }
+    }
+    var systemImage: String {
+        switch self {
+        case .injury:    "bandage.fill"
+        case .stiffness: "figure.walk.motion"
+        case .breathing: "lungs.fill"
+        case .other:     "exclamationmark.bubble.fill"
+        }
+    }
+}
+
+/// One thing that did not feel right during a session.
+struct SessionIssue: Codable, Identifiable {
+    var id: String
+    var kind: IssueKind
+    var area: String   // e.g. "Left knee", "Lower back"
+    var note: String
+
+    init(id: String = UUID().uuidString, kind: IssueKind = .injury, area: String = "", note: String = "") {
+        self.id = id
+        self.kind = kind
+        self.area = area
+        self.note = note
+    }
+
+    var isEmpty: Bool {
+        area.trimmingCharacters(in: .whitespaces).isEmpty && note.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+}
+
+/// How a session felt, plus anything that went well or did not feel right.
+struct SessionFeedback: Codable {
+    var difficulty: SessionDifficulty
+    var wentWell: String
+    var issues: [SessionIssue]
+
+    var isEmpty: Bool {
+        wentWell.trimmingCharacters(in: .whitespaces).isEmpty && issues.isEmpty
+    }
+}
+
 // MARK: - Combined detail
 
 /// Optional rich detail attached to an ActivityEntry. Only the branch matching
@@ -345,10 +446,12 @@ struct ActivityDetails: Codable {
     var sport: SportDetails?
     var swim: SwimDetails?
     var strength: [StrengthEntry]?
+    var feedback: SessionFeedback?
     var notes: String?
 
     var isEmpty: Bool {
-        sport == nil && swim == nil && (strength?.isEmpty ?? true) && (notes?.isEmpty ?? true)
+        sport == nil && swim == nil && (strength?.isEmpty ?? true)
+            && (feedback?.isEmpty ?? true) && (notes?.isEmpty ?? true)
     }
 }
 

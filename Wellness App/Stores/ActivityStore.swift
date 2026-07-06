@@ -16,6 +16,8 @@ final class ActivityStore {
     var dailySummaries: [DailyActivitySummary]
     /// Saved activities the user can pick again next time.
     var templates: [ActivityTemplate] = []
+    /// Guidance created from flagged injuries / issues, surfaced once next time.
+    var advisories: [ActivityAdvisory] = []
 
     private let db = Firestore.firestore()
     private var uid: String?
@@ -34,7 +36,7 @@ final class ActivityStore {
         listeners = []
 
         guard let uid else {
-            entries = []; dailySummaries = []; templates = []
+            entries = []; dailySummaries = []; templates = []; advisories = []
             return
         }
         // Steps and active energy come from HealthKit, wired later.
@@ -57,6 +59,62 @@ final class ActivityStore {
                     self?.templates = snap.documents.compactMap { try? $0.data(as: ActivityTemplate.self) }
                 }
         )
+        listeners.append(
+            db.collection("users/\(uid)/activityAdvisories")
+                .order(by: "reportedAt", descending: true)
+                .limit(to: 200)
+                .addSnapshotListener { [weak self] snap, _ in
+                    guard let snap else { return }
+                    self?.advisories = snap.documents.compactMap { try? $0.data(as: ActivityAdvisory.self) }
+                }
+        )
+    }
+
+    // MARK: - Advisories (injury guidance + next-time reminders)
+
+    func addAdvisory(_ advisory: ActivityAdvisory) {
+        if let uid {
+            try? db.collection("users/\(uid)/activityAdvisories").document(advisory.id).setData(from: advisory)
+        } else {
+            advisories.insert(advisory, at: 0)
+        }
+    }
+
+    /// The one unresolved advisory for this activity type that has not yet been
+    /// shown, so a reminder appears only the next time, not every time.
+    func pendingReminder(for type: ActivityType) -> ActivityAdvisory? {
+        advisories.first { $0.activityType == type && !$0.resolved && $0.lastRemindedAt == nil }
+    }
+
+    /// Create advisories from a session's flagged issues (injury, stiffness,
+    /// breathing). "Something else" issues are recorded in the log but do not
+    /// generate a rest reminder.
+    func recordAdvisories(from feedback: SessionFeedback?, activityType: ActivityType, sportRaw: String? = nil) {
+        guard let feedback else { return }
+        for issue in feedback.issues where issue.kind != .other && !issue.isEmpty {
+            let advice = InjuryAdvisor.advise(kind: issue.kind, area: issue.area, activity: activityType)
+            addAdvisory(ActivityAdvisory(
+                activityType: activityType,
+                sportRaw: sportRaw,
+                kind: issue.kind,
+                area: issue.area,
+                note: issue.note,
+                recommendation: advice.recommendation,
+                restDays: advice.restDays
+            ))
+        }
+    }
+
+    /// Mark an advisory as shown so it does not reappear on later sessions.
+    func markReminded(_ advisory: ActivityAdvisory) {
+        guard let uid else {
+            if let i = advisories.firstIndex(where: { $0.id == advisory.id }) {
+                advisories[i].lastRemindedAt = Date()
+            }
+            return
+        }
+        db.collection("users/\(uid)/activityAdvisories").document(advisory.id)
+            .updateData(["lastRemindedAt": Date()])
     }
 
     // MARK: - Templates

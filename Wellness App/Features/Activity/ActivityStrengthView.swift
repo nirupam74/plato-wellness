@@ -14,6 +14,7 @@ final class ActivityStrengthViewModel {
     var exercises: [StrengthEntry] = []
     var durationMin: Int = 45
     var intensity: ActivityIntensity = .medium
+    let feedback = SessionFeedbackDraft()
     var saveAsTemplate = false
 
     /// Set when editing an existing entry so Save overwrites it in place.
@@ -26,6 +27,7 @@ final class ActivityStrengthViewModel {
         editingLoggedAt = entry.loggedAt
         durationMin = entry.durationMin
         exercises = entry.details?.strength ?? []
+        feedback.load(entry.details?.feedback)
     }
 
     var canSave: Bool { durationMin > 0 && !exercises.isEmpty }
@@ -57,7 +59,9 @@ final class ActivityStrengthViewModel {
         return "Strength training"
     }
 
-    private func details() -> ActivityDetails { ActivityDetails(strength: exercises) }
+    private func details() -> ActivityDetails {
+        ActivityDetails(strength: exercises, feedback: feedback.model())
+    }
 
     func makeEntry(weightKg: Double) -> ActivityEntry {
         ActivityEntry(
@@ -72,7 +76,8 @@ final class ActivityStrengthViewModel {
     }
 
     func makeTemplate() -> ActivityTemplate {
-        ActivityTemplate(name: sessionName, type: .strength, durationMin: durationMin, details: details())
+        ActivityTemplate(name: sessionName, type: .strength, durationMin: durationMin,
+                         details: ActivityDetails(strength: exercises))
     }
 
     func apply(_ template: ActivityTemplate) {
@@ -88,6 +93,7 @@ struct ActivityStrengthView: View {
     @State private var viewModel = ActivityStrengthViewModel()
     @State private var showingExercisePicker = false
     @State private var didLoad = false
+    @State private var reminder: ActivityAdvisory?
 
     /// When set, the sheet edits this existing entry instead of creating one.
     var editing: ActivityEntry?
@@ -99,6 +105,10 @@ struct ActivityStrengthView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let reminder {
+                    Section { ActivityAdvisoryBanner(advisory: reminder) }
+                }
+
                 if !savedStrength.isEmpty {
                     Section("Saved workouts") {
                         ForEach(savedStrength) { template in
@@ -165,6 +175,8 @@ struct ActivityStrengthView: View {
                     }
                 }
 
+                SessionFeedbackSection(draft: viewModel.feedback)
+
                 Section {
                     HStack {
                         Label("Estimated burn", systemImage: "flame.fill")
@@ -205,6 +217,10 @@ struct ActivityStrengthView: View {
                 if let editing, !didLoad {
                     viewModel.load(editing)
                     didLoad = true
+                }
+                if reminder == nil, editing == nil, let r = activity.pendingReminder(for: .strength) {
+                    reminder = r
+                    activity.markReminded(r)
                 }
             }
         }
@@ -256,6 +272,7 @@ struct ActivityStrengthView: View {
         if viewModel.saveAsTemplate {
             activity.saveTemplate(viewModel.makeTemplate())
         }
+        activity.recordAdvisories(from: viewModel.feedback.model(), activityType: .strength)
         Haptics.success()
         dismiss()
     }
