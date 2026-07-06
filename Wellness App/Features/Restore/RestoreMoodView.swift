@@ -101,6 +101,8 @@ struct RestoreMoodView: View {
                                 y: .value("Mood", point.mood)
                             )
                             .foregroundStyle(Theme.restore)
+                            .accessibilityLabel(point.date.formatted(.dateTime.weekday(.wide).month().day()))
+                            .accessibilityValue("Mood \(point.mood) of 5")
                         }
                     }
                     .chartYScale(domain: 1...5)

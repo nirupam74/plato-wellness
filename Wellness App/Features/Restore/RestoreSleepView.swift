@@ -105,6 +105,8 @@ struct RestoreSleepView: View {
                             )
                             .foregroundStyle(Theme.restore.gradient)
                             .cornerRadius(4)
+                            .accessibilityLabel(point.date.formatted(.dateTime.weekday(.wide).month().day()))
+                            .accessibilityValue(point.hours > 0 ? String(format: "%.1f hours", point.hours) : "No sleep logged")
                         }
                         RuleMark(y: .value("Goal", goalHours))
                             .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
