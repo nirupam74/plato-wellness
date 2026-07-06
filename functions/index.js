@@ -69,7 +69,7 @@ function crisisSignal(text) {
 
 // ---- Consent gated context injection ---------------------------------------
 
-async function buildContextNote(uid) {
+async function buildContextNote(uid, profileSnap) {
   try {
     const [moods, sleeps, activities] = await Promise.all([
       db.collection(`users/${uid}/moodEntries`).orderBy("loggedAt", "desc").limit(3).get(),
@@ -78,6 +78,21 @@ async function buildContextNote(uid) {
     ]);
 
     const parts = [];
+
+    // Dietary constraints from the profile (already fetched by the caller, no
+    // extra read). Allergies matter most, so the companion never suggests them.
+    if (profileSnap && profileSnap.exists) {
+      const diet = profileSnap.get("dietType");
+      if (diet && diet !== "none") parts.push(`follows a ${diet} diet`);
+      const allergies = profileSnap.get("allergies");
+      if (Array.isArray(allergies) && allergies.length) {
+        parts.push(`allergies (never suggest these): ${allergies.join(", ")}`);
+      }
+      const avoid = profileSnap.get("foodsToAvoid");
+      if (Array.isArray(avoid) && avoid.length) {
+        parts.push(`foods they prefer to avoid: ${avoid.join(", ")}`);
+      }
+    }
     if (!moods.empty) {
       const m = moods.docs.map((d) => d.get("mood")).filter((v) => v != null);
       if (m.length) parts.push(`recent mood ratings (1 to 5): ${m.join(", ")}`);
@@ -139,7 +154,7 @@ exports.companionChat = onCall(
     let contextNote = "";
     const profileSnap = await db.doc(`users/${uid}`).get();
     if (profileSnap.exists && profileSnap.get("companionContextConsent") === true) {
-      contextNote = await buildContextNote(uid);
+      contextNote = await buildContextNote(uid, profileSnap);
     }
 
     // Recent history from the client, capped and normalized.
