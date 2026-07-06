@@ -16,6 +16,7 @@ struct ProfileSettingsView: View {
     @Environment(HealthKitManager.self) private var healthKit
     @Environment(NotificationManager.self) private var notifications
     @Environment(AuthManager.self) private var auth
+    @Environment(CompanionStore.self) private var companion
 
     @AppStorage("appearance") private var appearance: ProfileAppearance = .system
     @AppStorage("notify.meals") private var notifyMeals = true
@@ -156,7 +157,7 @@ struct ProfileSettingsView: View {
             titleVisibility: .visible
         ) {
             Button("Delete history", role: .destructive) {
-                // Wired to the companion store's delete in a later phase.
+                companion.clearHistory()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
