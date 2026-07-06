@@ -52,7 +52,6 @@ struct OnboardingFlowView: View {
     private var stepContent: some View {
         switch vm.step {
         case .welcome:       OnboardingWelcomeStep()
-        case .signIn:        OnboardingSignInStep(vm: vm)
         case .basics:        OnboardingBasicsStep(vm: vm)
         case .measurements:  OnboardingMeasurementsStep(vm: vm)
         case .activity:      OnboardingActivityStep(vm: vm)
@@ -111,11 +110,8 @@ struct OnboardingFlowView: View {
         }
     }
 
-    /// The sign in step supplies its own primary action (the Apple button),
-    /// so the generic Next button is hidden there.
-    private var showsPrimaryButton: Bool {
-        vm.step != .signIn
-    }
+    /// Every step uses the generic primary (Next) button in the footer.
+    private var showsPrimaryButton: Bool { true }
 
     private var primaryLabel: String {
         switch vm.step {

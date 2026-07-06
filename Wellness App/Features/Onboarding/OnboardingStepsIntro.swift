@@ -60,32 +60,7 @@ private struct OnboardingWelcomeBullet: View {
     }
 }
 
-// MARK: - 2. Sign in with Apple (placeholder)
-
-struct OnboardingSignInStep: View {
-    @Bindable var vm: OnboardingViewModel
-
-    var body: some View {
-        OnboardingStepScaffold(
-            title: "Create your account",
-            subtitle: "Sign in to save your progress and sync across devices.",
-            systemImage: "person.crop.circle.badge.checkmark"
-        ) {
-            VStack(alignment: .leading, spacing: 16) {
-                OnboardingApplePlaceholderButton {
-                    vm.didSignIn = true
-                    vm.advance()
-                }
-                Text("Real authentication arrives soon. For now this continues so you can explore the app.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-    }
-}
-
-// MARK: - 3. Basics
+// MARK: - 2. Basics
 
 struct OnboardingBasicsStep: View {
     @Bindable var vm: OnboardingViewModel

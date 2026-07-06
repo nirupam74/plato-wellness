@@ -14,7 +14,6 @@ import Observation
 /// The ordered steps of onboarding. `rawValue` doubles as the progress index.
 enum OnboardingStep: Int, CaseIterable, Identifiable {
     case welcome
-    case signIn
     case basics
     case measurements
     case activity
@@ -33,7 +32,6 @@ enum OnboardingStep: Int, CaseIterable, Identifiable {
     var shortTitle: String {
         switch self {
         case .welcome:       "Welcome"
-        case .signIn:        "Sign in"
         case .basics:        "About you"
         case .measurements:  "Measurements"
         case .activity:      "Activity"
@@ -66,7 +64,6 @@ final class OnboardingViewModel {
 
     // MARK: - Sign in (placeholder)
 
-    var didSignIn = false
 
     // MARK: - Basics
 
@@ -255,7 +252,6 @@ final class OnboardingViewModel {
     var canAdvance: Bool {
         switch step {
         case .welcome:       return true
-        case .signIn:        return true
         case .basics:        return !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                   && heightCm > 0 && currentWeightKg > 0
         case .measurements:  return true

@@ -278,34 +278,6 @@ struct OnboardingTokenEditor: View {
     }
 }
 
-/// A placeholder "Sign in with Apple" styled button. It only advances the flow;
-/// real AuthenticationServices wiring lands later once entitlements exist.
-struct OnboardingApplePlaceholderButton: View {
-    let action: () -> Void
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: "applelogo")
-                    .accessibilityHidden(true)
-                Text("Sign in with Apple")
-                    .font(.headline)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .foregroundStyle(scheme == .dark ? Color.black : Color.white)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(scheme == .dark ? Color.white : Color.black)
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Sign in with Apple")
-        .accessibilityHint("Placeholder that continues to the next step")
-    }
-}
-
 /// A soft callout box, used for the unsafe deficit warning and crisis notes.
 struct OnboardingCallout: View {
     enum Kind { case warning, info }
