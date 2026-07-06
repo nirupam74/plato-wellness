@@ -33,3 +33,4 @@ change.
 | 2026-07-06 00:55 | self-directed | Companion chat honors Reduce Motion (crisis card fade vs slide, unanimated state change, non-animated scroll) | 032aba9 |
 | 2026-07-06 01:01 | self-directed | Typing indicator stops its repeatForever pulse under Reduce Motion (audited all remaining Features animations; others already guarded/gentle) | e9e9da3 |
 | 2026-07-06 01:06 | self-directed | SectionHeaderRow title marked .isHeader (VoiceOver rotor heading navigation app-wide from one component) | b80ba7c |
+| 2026-07-06 01:13 | self-directed | Actionable crisis (Call/Text 988 tel+sms) and contact (mailto) links in Help/Privacy/Terms; PolicySection gained optional contactEmail | 0fccea6 |
