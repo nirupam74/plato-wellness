@@ -51,3 +51,4 @@ change.
 | 2026-07-06 03:00 | self-directed | Corrected 3 stale stub comments (sleep import, settings actions, daily activity source); audited HealthMath + streak logic and confirmed correct + DST-safe (no change needed) | 22b2af8 |
 | 2026-07-06 03:07 | self-directed | FIX: progress photo upload failures were silent; uploadPhoto now returns success and the gallery shows a retry message on failure | 6822937 |
 | 2026-07-06 03:14 | self-directed | FIX: account-deletion failures were silent in Settings; now shown under Account (stale errors cleared on appear/before attempt) + footer notes recent-login requirement. Verified sign-in errors already surfaced | 539969d |
+| 2026-07-06 03:21 | self-directed | Clamp custom-food + manual food entry calories/macros/servings to non-negative on save (defense against negatives corrupting daily totals). Verified weight editor already guards <=0; catch blocks all handled | 9e7b4d5 |
