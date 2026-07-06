@@ -22,6 +22,7 @@ struct RestoreWaterView: View {
             VStack(spacing: 16) {
                 progressCard
                 quickAddCard
+                todayLogCard
             }
             .padding()
         }
@@ -67,6 +68,44 @@ struct RestoreWaterView: View {
                 Text(total >= target ? "Nice, you have hit your water goal for today." : "\(max(0, target - total)) ml to go.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder private var todayLogCard: some View {
+        let todays = restore.waterEntries
+            .filter { $0.loggedAt.isSameDay(as: Date()) }
+            .sorted { $0.loggedAt > $1.loggedAt }
+        if !todays.isEmpty {
+            Card {
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeaderRow("Today's log")
+                    ForEach(todays) { entry in
+                        HStack(spacing: 12) {
+                            Image(systemName: "drop.fill")
+                                .foregroundStyle(Theme.restore)
+                                .accessibilityHidden(true)
+                            Text("\(entry.amountMl) ml")
+                                .font(.subheadline)
+                            Text(entry.loggedAt.formatted(.dateTime.hour().minute()))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer(minLength: 0)
+                            Button(role: .destructive) {
+                                restore.removeWater(entry)
+                                Haptics.tap()
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel("Delete \(entry.amountMl) millilitre entry at \(entry.loggedAt.formatted(.dateTime.hour().minute()))")
+                        }
+                        .accessibilityElement(children: .combine)
+                        if entry.id != todays.last?.id {
+                            Divider()
+                        }
+                    }
+                }
             }
         }
     }

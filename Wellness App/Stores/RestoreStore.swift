@@ -85,6 +85,17 @@ final class RestoreStore {
         }
     }
 
+    func removeWater(_ entry: WaterEntry) {
+        // Removes the Firestore record only. We do not delete the matching
+        // HealthKit sample: there is no HK water-delete path wired, and the app
+        // only writes water it does not manage HK history destructively.
+        if let ref = doc("waterEntries", entry.id) {
+            ref.delete()
+        } else {
+            waterEntries.removeAll { $0.id == entry.id }
+        }
+    }
+
     /// Write nights imported from Apple Health. Deterministic ids mean repeated
     /// imports overwrite rather than duplicate.
     func importHealthKitSleep(_ entries: [SleepEntry]) {
