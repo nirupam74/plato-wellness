@@ -125,6 +125,22 @@ final class NutritionStore {
         }
     }
 
+    func removeCustomFood(_ food: CustomFood) {
+        if let uid {
+            db.collection("users/\(uid)/customFoods").document(food.id).delete()
+        } else {
+            customFoods.removeAll { $0.id == food.id }
+        }
+    }
+
+    func removeRecipe(_ recipe: Recipe) {
+        if let uid {
+            db.collection("users/\(uid)/recipes").document(recipe.id).delete()
+        } else {
+            recipes.removeAll { $0.id == recipe.id }
+        }
+    }
+
     func toggleFavorite(_ food: CustomFood) {
         guard let i = customFoods.firstIndex(where: { $0.id == food.id }) else { return }
         var updated = customFoods[i]

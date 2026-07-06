@@ -80,7 +80,15 @@ struct NutritionCustomFoodsView: View {
                         }
                     }
                 }
+                .onDelete(perform: deleteCustomFoods)
             }
+        }
+    }
+
+    private func deleteCustomFoods(at offsets: IndexSet) {
+        let foods = nutrition.customFoods
+        for index in offsets {
+            nutrition.removeCustomFood(foods[index])
         }
     }
 
@@ -108,7 +116,15 @@ struct NutritionCustomFoodsView: View {
                         }
                     }
                 }
+                .onDelete(perform: deleteRecipes)
             }
+        }
+    }
+
+    private func deleteRecipes(at offsets: IndexSet) {
+        let all = nutrition.recipes
+        for index in offsets {
+            nutrition.removeRecipe(all[index])
         }
     }
 
