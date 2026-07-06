@@ -45,3 +45,4 @@ change.
 | 2026-07-06 02:20 | self-directed | FIX: mood check-ins were undeletable; added RestoreStore.removeMood + Recent check ins list with per-entry delete. Verified recipes/customFoods fully wired. Follow-up: same delete gap for sleep + water entries | 754daa5 |
 | 2026-07-06 02:26 | self-directed | FIX: sleep entries were undeletable; added RestoreStore.removeSleep + Recent nights list with per-entry delete. Follow-up: water entries (last one) | 9b68e14 |
 | 2026-07-06 02:32 | self-directed | FIX: water entries were undeletable; added RestoreStore.removeWater + Today log list with per-entry delete. All Restore log types (mood/sleep/water) now deletable | e92abfb |
+| 2026-07-06 02:38 | self-directed | FIX: custom foods + recipes were undeletable; added NutritionStore.removeCustomFood/removeRecipe + swipe-to-delete. Mindful sessions have no per-session list UI (skipped); body measurements delete still pending | b0feb51 |
