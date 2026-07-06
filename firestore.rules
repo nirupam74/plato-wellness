@@ -1,0 +1,54 @@
+rules_version = '2';
+
+// Every read and write is scoped to the owning user. This is a launch blocker,
+// not a follow up (per the build spec). Companion messages are the most
+// sensitive collection and get the same owner-only treatment.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid);
+      // Account deletion is handled out of band (a function), never by the client.
+      allow delete: if false;
+
+      // User generated logs: full CRUD, owner only.
+      match /foodEntries/{doc}     { allow read, write: if isOwner(uid); }
+      match /customFoods/{doc}     { allow read, write: if isOwner(uid); }
+      match /recipes/{doc}         { allow read, write: if isOwner(uid); }
+      match /activityEntries/{doc} { allow read, write: if isOwner(uid); }
+      match /waterEntries/{doc}    { allow read, write: if isOwner(uid); }
+      match /sleepEntries/{doc}    { allow read, write: if isOwner(uid); }
+      match /moodEntries/{doc}     { allow read, write: if isOwner(uid); }
+      match /restoreSessions/{doc} { allow read, write: if isOwner(uid); }
+      match /skincareRoutine/{doc} { allow read, write: if isOwner(uid); }
+      match /skincareLogs/{doc}    { allow read, write: if isOwner(uid); }
+      match /measurements/{doc}    { allow read, write: if isOwner(uid); }
+      match /progressPhotos/{doc}  { allow read, write: if isOwner(uid); }
+
+      // Companion chat: owner only. The client writes its own user messages and
+      // may delete history; assistant replies are written by the callable
+      // function via the Admin SDK, which bypasses these rules.
+      match /companionMessages/{doc} { allow read, write: if isOwner(uid); }
+
+      // Daily rollups: written ONLY by the nightly Cloud Function (Admin SDK
+      // bypasses rules). The client may read but never write.
+      match /dailyRollups/{day} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+    }
+
+    // Default deny for anything not matched above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
