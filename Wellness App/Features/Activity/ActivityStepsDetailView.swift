@@ -57,6 +57,8 @@ struct ActivityStepsDetailView: View {
                         )
                         .foregroundStyle(Theme.activity.gradient)
                         .cornerRadius(4)
+                        .accessibilityLabel(item.date.formatted(.dateTime.weekday(.wide).month().day()))
+                        .accessibilityValue("\(item.steps.formatted()) steps")
                     }
                     RuleMark(y: .value("Goal", stepGoal))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [4]))
@@ -88,6 +90,8 @@ struct ActivityStepsDetailView: View {
                         )
                         .foregroundStyle(Theme.activity.opacity(0.7).gradient)
                         .cornerRadius(4)
+                        .accessibilityLabel(item.date.formatted(.dateTime.weekday(.wide).month().day()))
+                        .accessibilityValue("\(item.kcal.formatted()) kilocalories")
                     }
                 }
                 .frame(height: 180)
