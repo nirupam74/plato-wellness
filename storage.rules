@@ -6,9 +6,13 @@ service firebase.storage {
   match /b/{bucket}/o {
     match /users/{uid}/progressPhotos/{photo} {
       allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if request.auth != null && request.auth.uid == uid
+      // Create/update validate the incoming file. Delete must be its own rule:
+      // on a delete request.resource is null, so the size/type checks would deny
+      // it and leave orphaned photos in Storage after the user removes them.
+      allow create, update: if request.auth != null && request.auth.uid == uid
         && request.resource.size < 15 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null && request.auth.uid == uid;
     }
     match /{allPaths=**} {
       allow read, write: if false;
