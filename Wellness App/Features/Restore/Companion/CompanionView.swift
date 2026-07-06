@@ -18,6 +18,7 @@ struct CompanionView: View {
     @Environment(UserStore.self) private var user
 
     @AppStorage("companionDisclaimerShown") private var disclaimerShown = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var draft = ""
     @State private var showDisclaimer = false
@@ -30,7 +31,7 @@ struct CompanionView: View {
                 CompanionCrisisCard(resources: companion.crisisResources)
                     .padding(.horizontal)
                     .padding(.top, 8)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
             }
 
             messageList
@@ -43,7 +44,7 @@ struct CompanionView: View {
         .navigationTitle("Companion")
         .navigationBarTitleDisplayMode(.inline)
         .tint(Theme.restore)
-        .animation(.snappy, value: companion.isCrisisActive)
+        .animation(reduceMotion ? nil : .snappy, value: companion.isCrisisActive)
         .toolbar { toolbarContent }
         .sheet(isPresented: $showResources) {
             CompanionResourcesView(resources: companion.crisisResources)
@@ -110,6 +111,10 @@ struct CompanionView: View {
     }
 
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
+        guard !reduceMotion else {
+            proxy.scrollTo(Self.bottomAnchor, anchor: .bottom)
+            return
+        }
         withAnimation(.easeOut(duration: 0.25)) {
             proxy.scrollTo(Self.bottomAnchor, anchor: .bottom)
         }
