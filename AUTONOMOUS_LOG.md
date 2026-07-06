@@ -36,3 +36,4 @@ change.
 | 2026-07-06 01:13 | self-directed | Actionable crisis (Call/Text 988 tel+sms) and contact (mailto) links in Help/Privacy/Terms; PolicySection gained optional contactEmail | 0fccea6 |
 | 2026-07-06 01:20 | self-directed | FIX: Settings Delete companion history was a no-op stub despite its confirm dialog; now calls CompanionStore.clearHistory (real privacy control) | dc24cf7 |
 | 2026-07-06 01:28 | self-directed | FIX: removed redundant placeholder Sign in with Apple onboarding step (real auth is upstream in SignInView); dropped OnboardingSignInStep + OnboardingApplePlaceholderButton + didSignIn | 5d8db8f |
+| 2026-07-06 01:35 | self-directed | Onboarding Connect Health now calls real HealthKitManager.requestAuthorization + honest copy (was placeholder). Deferred (risky unattended): onboarding notifications prompt wiring + RootView sign-in-vs-onboarding HealthKit timing | 36dcaf2 |
