@@ -187,6 +187,17 @@ final class UserStore {
         }
     }
 
+    /// Delete a progress photo from both Storage and Firestore. Sensitive body
+    /// photos must be fully removable, not just hidden.
+    func removePhoto(_ photo: ProgressPhoto) {
+        guard let uid else {
+            progressPhotos.removeAll { $0.id == photo.id }
+            return
+        }
+        Storage.storage().reference().child("users/\(uid)/progressPhotos/\(photo.id).jpg").delete { _ in }
+        db.collection("users/\(uid)/progressPhotos").document(photo.id).delete()
+    }
+
     var weightSeries: [(date: Date, weightKg: Double)] {
         measurements
             .compactMap { m in m.weightKg.map { (m.recordedAt, $0) } }

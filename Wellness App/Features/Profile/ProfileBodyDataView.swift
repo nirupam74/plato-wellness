@@ -264,7 +264,7 @@ struct ProfileBodyDataView: View {
         } header: {
             Text("Progress photos")
         } footer: {
-            Text("Photos stay on your device for now. Private cloud sync arrives with your account.")
+            Text("Photos are stored privately in your account and are only visible to you. Touch and hold a photo to delete it.")
         }
     }
 
@@ -329,6 +329,13 @@ private struct ProfilePhotoGallery: View {
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .accessibilityLabel("Progress photo")
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                user.removePhoto(photo)
+                            } label: {
+                                Label("Delete photo", systemImage: "trash")
+                            }
+                        }
                 }
             }
 
