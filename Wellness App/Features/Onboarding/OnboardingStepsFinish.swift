@@ -76,10 +76,11 @@ struct OnboardingTargetsStep: View {
     }
 }
 
-// MARK: - 10. HealthKit (placeholder)
+// MARK: - 10. HealthKit
 
 struct OnboardingHealthKitStep: View {
     @Bindable var vm: OnboardingViewModel
+    @Environment(HealthKitManager.self) private var healthKit
 
     var body: some View {
         OnboardingStepScaffold(
@@ -89,7 +90,10 @@ struct OnboardingHealthKitStep: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 Button {
-                    vm.healthKitRequested = true
+                    Task {
+                        await healthKit.requestAuthorization()
+                        vm.healthKitRequested = true
+                    }
                 } label: {
                     Label(
                         vm.healthKitRequested ? "Requested" : "Allow Health access",
@@ -105,8 +109,8 @@ struct OnboardingHealthKitStep: View {
 
                 OnboardingCallout(
                     kind: .info,
-                    title: "Placeholder",
-                    message: "The real Health permission prompt is added later. You can connect or change this anytime in settings."
+                    title: "You are in control",
+                    message: "Apple Health will ask which data to share. You can connect or change this anytime in Settings."
                 )
             }
         }
