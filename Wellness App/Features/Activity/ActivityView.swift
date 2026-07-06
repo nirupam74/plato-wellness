@@ -15,6 +15,7 @@ struct ActivityView: View {
     @Environment(AppState.self) private var appState
     @State private var viewModel = ActivityViewModel()
     @State private var editingEntry: ActivityEntry?
+    @State private var showLive = false
 
     private var todayEntries: [ActivityEntry] {
         viewModel.todayEntries(activity.entries)
@@ -53,6 +54,11 @@ struct ActivityView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button {
+                            showLive = true
+                        } label: {
+                            Label("Track live workout", systemImage: "location.fill")
+                        }
+                        Button {
                             viewModel.presentWorkout()
                         } label: {
                             Label("Log workout", systemImage: "figure.run")
@@ -82,6 +88,9 @@ struct ActivityView: View {
             }
             .sheet(item: $editingEntry) { entry in
                 editor(for: entry)
+            }
+            .fullScreenCover(isPresented: $showLive) {
+                ActivityLiveView()
             }
         }
         .tint(Theme.activity)
