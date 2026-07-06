@@ -22,3 +22,4 @@ change.
 | 14 | 2026-07-05 | ios, healthkit | RestoreView | Self-directed: pull-to-refresh on Restore re-syncs HealthKit. | ✓ build |
 | 15 | 2026-07-05 | ios | ProfileView | Self-directed: streak-milestone celebration in the Profile header. | ✓ build |
 | 2026-07-06 00:00 | self-directed | About section in Settings showing app version + build number (App Store expectation, VoiceOver-combined) | dffda53 |
+| 2026-07-06 00:05 | self-directed | Per-bar VoiceOver accessibility on steps + active-energy charts (date + value per day, navigable) | 62c4243 |
