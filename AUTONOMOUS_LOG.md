@@ -12,3 +12,4 @@ change.
 | 4 | 2026-07-05 | security, ios | functions, rules, ProfileSettingsView, PrivacyInfo | App Store readiness: in-app account deletion (deleteAccount function + UI), PrivacyInfo.xcprivacy manifest, hardened Firestore rules, accessibility options, and in-app Help + Privacy Policy. | ✓ build + deploy |
 | 5 | 2026-07-05 | ios | Stores | Bounded the busy Firestore listeners (food, activity, water, sleep, mood, sessions) with ordering + limits to cap reads for long histories. | ✓ build |
 | 6 | 2026-07-05 | ios | Theme, RestoreView, Nutrition/Activity | UI refresh from the dashboard task: blue and white palette, distinct skincare icon, and removed redundant empty-state log buttons. | ✓ build |
+| 7 | 2026-07-05 | ios | Focus/ | Focus Lock: commitment-based app blocking via Family Controls / Screen Time, reached from Restore. Needs a real device + entitlement approval. | ✓ build |
