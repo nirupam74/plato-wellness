@@ -45,6 +45,7 @@ struct ProfileSettingsView: View {
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { auth.errorMessage = nil }
         .onChange(of: notifyMeals) { _, _ in applyNotificationPrefs() }
         .onChange(of: notifyWater) { _, _ in applyNotificationPrefs() }
         .onChange(of: notifySleep) { _, _ in applyNotificationPrefs() }
@@ -215,10 +216,17 @@ struct ProfileSettingsView: View {
                 }
             }
             .disabled(isDeletingAccount)
+
+            if let error = auth.errorMessage, !isDeletingAccount {
+                Label(error, systemImage: "exclamationmark.triangle")
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         } header: {
             Text("Account")
         } footer: {
-            Text("Deleting your account permanently removes all your data from Plato Wellness and cannot be undone.")
+            Text("Deleting your account permanently removes all your data from Plato Wellness and cannot be undone. If it has been a while since you signed in, you may be asked to sign in again first.")
         }
         .confirmationDialog("Sign out?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
             Button("Sign out", role: .destructive) { auth.signOut() }
@@ -230,6 +238,7 @@ struct ProfileSettingsView: View {
             titleVisibility: .visible
         ) {
             Button("Delete everything", role: .destructive) {
+                auth.errorMessage = nil
                 isDeletingAccount = true
                 Task {
                     await auth.deleteAccount()
