@@ -32,10 +32,19 @@ struct HelpView: View {
 
             Section("If you are in crisis") {
                 Text("If you are thinking about harming yourself, please reach out right now. In the US and Canada you can call or text 988, or call 911 for immediate danger. You are not alone.")
+                Link(destination: URL(string: "tel:988")!) {
+                    Label("Call 988", systemImage: "phone.fill")
+                }
+                Link(destination: URL(string: "sms:988")!) {
+                    Label("Text 988", systemImage: "message.fill")
+                }
             }
 
             Section("Contact") {
-                Text("Questions or feedback? Reach us at support@platowellness.app.")
+                Text("Questions or feedback? We would love to hear from you.")
+                Link(destination: URL(string: "mailto:support@platowellness.app")!) {
+                    Label("Email support", systemImage: "envelope.fill")
+                }
             }
         }
         .navigationTitle("Help")
@@ -86,7 +95,8 @@ struct PrivacyPolicyView: View {
                     text: "You can delete your companion history at any time, and you can delete your entire account from Settings, which permanently removes all of your data.")
 
                 PolicySection(title: "Contact",
-                    text: "Questions about privacy? Email privacy@platowellness.app.")
+                    text: "Questions about privacy? We are happy to help.",
+                    contactEmail: "privacy@platowellness.app")
             }
             .padding()
         }
@@ -98,11 +108,19 @@ struct PrivacyPolicyView: View {
 private struct PolicySection: View {
     var title: String
     var text: String
+    var contactEmail: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title).font(.headline)
             Text(text).font(.subheadline).foregroundStyle(.secondary)
+            if let contactEmail, let url = URL(string: "mailto:\(contactEmail)") {
+                Link(destination: url) {
+                    Label(contactEmail, systemImage: "envelope.fill")
+                        .font(.subheadline)
+                }
+                .padding(.top, 2)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
@@ -137,7 +155,8 @@ struct TermsView: View {
                     text: "We may update these terms as the app evolves. Continued use after an update means you accept the revised terms.")
 
                 PolicySection(title: "Contact",
-                    text: "Questions about these terms? Email support@platowellness.app.")
+                    text: "Questions about these terms? We are happy to help.",
+                    contactEmail: "support@platowellness.app")
             }
             .padding()
         }
