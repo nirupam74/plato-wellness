@@ -43,3 +43,4 @@ change.
 | 2026-07-06 02:03 | self-directed | companionChat context note now includes consent-gated diet/allergies/foods-to-avoid (safety: never-suggest allergies), reusing already-fetched profile. Verified: consent gating + mood/sleep/activity already correctly wired. NEEDS firebase deploy --only functions | c8543e1 |
 | 2026-07-06 02:11 | self-directed | Data export now includes companion messages (JSON + CSV + count row); verified ProfileExporter is a real serializer, not a stub | 6d06b1f |
 | 2026-07-06 02:20 | self-directed | FIX: mood check-ins were undeletable; added RestoreStore.removeMood + Recent check ins list with per-entry delete. Verified recipes/customFoods fully wired. Follow-up: same delete gap for sleep + water entries | 754daa5 |
+| 2026-07-06 02:26 | self-directed | FIX: sleep entries were undeletable; added RestoreStore.removeSleep + Recent nights list with per-entry delete. Follow-up: water entries (last one) | 9b68e14 |
