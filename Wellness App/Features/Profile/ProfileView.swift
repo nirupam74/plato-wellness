@@ -128,6 +128,13 @@ private struct ProfileHeaderView: View {
                              systemImage: "figure.run",
                              tint: Theme.activity)
                 }
+
+                if let celebration = streakMilestone {
+                    Label(celebration, systemImage: "party.popper.fill")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Theme.nutrition)
+                        .accessibilityLabel(celebration)
+                }
             }
         }
         .padding(.horizontal)
@@ -139,6 +146,19 @@ private struct ProfileHeaderView: View {
         let hour = Calendar.current.component(.hour, from: Date())
         let part = hour < 12 ? "Good morning" : (hour < 18 ? "Good afternoon" : "Good evening")
         return name.isEmpty ? part : "\(part), \(name)"
+    }
+
+    private var streakMilestone: String? {
+        switch streak {
+        case 3: "3 day streak, great start."
+        case 7: "One week streak. Keep it going."
+        case 14: "Two weeks strong."
+        case 30: "30 day streak. Amazing."
+        case 50: "50 days. Incredible consistency."
+        case 100: "100 day streak."
+        case 365: "A full year. Remarkable."
+        default: nil
+        }
     }
 
     private var initials: String {

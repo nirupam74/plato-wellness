@@ -20,3 +20,4 @@ change.
 | 12 | 2026-07-05 | ios | Components | Self-directed: StatTile combines into one VoiceOver element with accessibilityValue. | ✓ build |
 | 13 | 2026-07-05 | ios, healthkit | ActivityView | Self-directed: pull-to-refresh on Activity re-syncs HealthKit. | ✓ build |
 | 14 | 2026-07-05 | ios, healthkit | RestoreView | Self-directed: pull-to-refresh on Restore re-syncs HealthKit. | ✓ build |
+| 15 | 2026-07-05 | ios | ProfileView | Self-directed: streak-milestone celebration in the Profile header. | ✓ build |
