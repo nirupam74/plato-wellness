@@ -117,7 +117,9 @@ struct SectionHeaderRow<Accessory: View>: View {
 
     var body: some View {
         HStack {
-            Text(title).font(.headline)
+            Text(title)
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
             Spacer()
             accessory
         }
