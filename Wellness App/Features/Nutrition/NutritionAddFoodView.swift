@@ -11,22 +11,23 @@
 import SwiftUI
 
 enum NutritionAddFoodMode: String, CaseIterable, Identifiable {
-    case manual, recents, favorites, search
+    case search, manual, recents, favorites, saved
 
     var id: String { rawValue }
     var label: String {
         switch self {
+        case .search:    "Search"
         case .manual:    "Manual"
         case .recents:   "Recents"
         case .favorites: "Favorites"
-        case .search:    "Saved"
+        case .saved:     "Saved"
         }
     }
 }
 
 @Observable
 final class NutritionAddFoodViewModel {
-    var mode: NutritionAddFoodMode = .manual
+    var mode: NutritionAddFoodMode = .search
 
     /// Meal used both by the manual form and the quick-add lists.
     var meal: MealType
@@ -125,6 +126,8 @@ struct NutritionAddFoodView: View {
     @State private var showFoodEditor = false
     @State private var showRecipeEditor = false
     @State private var showLibrary = false
+    @State private var selectedIngredient: LibraryIngredient?
+    @State private var selectedMeal: LibraryMeal?
 
     init(initialMeal: MealType = .breakfast) {
         _viewModel = State(initialValue: NutritionAddFoodViewModel(meal: initialMeal))
@@ -143,10 +146,11 @@ struct NutritionAddFoodView: View {
                 .padding(.top, 8)
 
                 switch viewModel.mode {
+                case .search:    searchTab
                 case .manual:    manualForm
                 case .recents:   recentsList
                 case .favorites: favoritesList
-                case .search:    searchList
+                case .saved:     savedList
                 }
             }
             .navigationTitle("Add food")
@@ -221,35 +225,128 @@ struct NutritionAddFoodView: View {
         }
     }
 
+    // MARK: - Search (first tab)
+
+    private var searchTab: some View {
+        let query = viewModel.searchText.trimmingCharacters(in: .whitespaces)
+        let ingredients = query.isEmpty ? [] : FoodLibrary.ingredients.filter { $0.name.localizedCaseInsensitiveContains(query) }
+        let meals = query.isEmpty ? [] : FoodLibrary.meals.filter { $0.name.localizedCaseInsensitiveContains(query) }
+        let foods = query.isEmpty ? [] : viewModel.filteredCustomFoods(nutrition.customFoods)
+        let recipes = query.isEmpty ? [] : viewModel.filteredRecipes(nutrition.recipes)
+
+        return List {
+            Section {
+                Button { showLibrary = true } label: {
+                    Label("Browse food database", systemImage: "square.grid.2x2")
+                }
+                Button { showFoodEditor = true } label: {
+                    Label("New custom food", systemImage: "fork.knife")
+                }
+                Button { showRecipeEditor = true } label: {
+                    Label("New recipe from ingredients", systemImage: "list.bullet.rectangle")
+                }
+            }
+
+            mealAndServingsHeader
+
+            if !query.isEmpty {
+                if !foods.isEmpty {
+                    Section("Your foods") {
+                        ForEach(foods) { food in
+                            Button {
+                                nutrition.logCustomFood(food, meal: viewModel.meal, servings: viewModel.quickServings)
+                                Haptics.success(); dismiss()
+                            } label: {
+                                quickRow(name: food.name, calories: food.calories,
+                                         protein: food.proteinG, carbs: food.carbsG, fat: food.fatG)
+                            }
+                        }
+                    }
+                }
+                if !recipes.isEmpty {
+                    Section("Your recipes") {
+                        ForEach(recipes) { recipe in
+                            Button {
+                                nutrition.logRecipe(recipe, meal: viewModel.meal)
+                                Haptics.success(); dismiss()
+                            } label: {
+                                let per = recipe.perServing
+                                quickRow(name: recipe.name, calories: per.calories,
+                                         protein: per.proteinG, carbs: per.carbsG, fat: per.fatG)
+                            }
+                        }
+                    }
+                }
+                if !ingredients.isEmpty {
+                    Section("Ingredients") {
+                        ForEach(ingredients) { ingredient in
+                            Button { selectedIngredient = ingredient } label: {
+                                databaseRow(name: ingredient.name, detail: "per 100 g", calories: ingredient.per100g.calories)
+                            }
+                        }
+                    }
+                }
+                if !meals.isEmpty {
+                    Section("Meals") {
+                        ForEach(meals) { meal in
+                            Button { selectedMeal = meal } label: {
+                                databaseRow(name: meal.name, detail: meal.servingLabel, calories: meal.perServing.calories)
+                            }
+                        }
+                    }
+                }
+                if foods.isEmpty && recipes.isEmpty && ingredients.isEmpty && meals.isEmpty {
+                    emptyState("No matches",
+                               "Try another search, or browse the full food database above.",
+                               systemImage: "magnifyingglass")
+                }
+            }
+        }
+        .searchable(text: $viewModel.searchText, prompt: "Search foods, meals, and ingredients")
+        .sheet(item: $selectedIngredient) { ingredient in
+            IngredientPortionSheet(ingredient: ingredient) { name, macros in
+                logMacros(name, macros)
+            }
+        }
+        .sheet(item: $selectedMeal) { meal in
+            MealPortionSheet(meal: meal) { name, macros in
+                logMacros(name, macros)
+            }
+        }
+    }
+
+    private func databaseRow(name: String, detail: String, calories: Int) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name).foregroundStyle(.primary)
+                Text("\(calories) cal · \(detail)").font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 8)
+            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(name), \(calories) calories \(detail)")
+    }
+
+    private func logMacros(_ name: String, _ macros: MacroBreakdown) {
+        nutrition.add(FoodEntry(
+            name: name,
+            mealType: viewModel.meal,
+            servings: 1,
+            calories: macros.calories,
+            proteinG: macros.proteinG,
+            carbsG: macros.carbsG,
+            fatG: macros.fatG,
+            source: .database
+        ))
+        Haptics.success()
+        dismiss()
+    }
+
     // MARK: - Manual
 
     private var manualForm: some View {
         Form {
-            Section("Food") {
-                TextField("Name", text: $viewModel.name)
-                Picker("Meal", selection: $viewModel.meal) {
-                    ForEach(MealType.allCases) { meal in
-                        Label(meal.label, systemImage: meal.systemImage).tag(meal)
-                    }
-                }
-                Stepper(value: $viewModel.servings, in: 0.25...20, step: 0.25) {
-                    HStack {
-                        Text("Servings")
-                        Spacer()
-                        Text(NutritionFormat.servings(viewModel.servings))
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                    }
-                }
-            }
-
-            Section("Per serving") {
-                macroField("Calories", text: $viewModel.caloriesText, unit: "cal")
-                macroField("Protein", text: $viewModel.proteinText, unit: "g")
-                macroField("Carbs", text: $viewModel.carbsText, unit: "g")
-                macroField("Fat", text: $viewModel.fatText, unit: "g")
-            }
-
             Section {
                 if BarcodeScannerView.isAvailable {
                     Button {
@@ -280,6 +377,31 @@ struct NutritionAddFoodView: View {
                 Text("Scan a label")
             } footer: {
                 Text("Scans look up the free Open Food Facts database. Only the barcode is sent, and you confirm the values before adding.")
+            }
+
+            Section("Food") {
+                TextField("Name", text: $viewModel.name)
+                Picker("Meal", selection: $viewModel.meal) {
+                    ForEach(MealType.allCases) { meal in
+                        Label(meal.label, systemImage: meal.systemImage).tag(meal)
+                    }
+                }
+                Stepper(value: $viewModel.servings, in: 0.25...20, step: 0.25) {
+                    HStack {
+                        Text("Servings")
+                        Spacer()
+                        Text(NutritionFormat.servings(viewModel.servings))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                }
+            }
+
+            Section("Per serving") {
+                macroField("Calories", text: $viewModel.caloriesText, unit: "cal")
+                macroField("Protein", text: $viewModel.proteinText, unit: "g")
+                macroField("Carbs", text: $viewModel.carbsText, unit: "g")
+                macroField("Fat", text: $viewModel.fatText, unit: "g")
             }
         }
     }
@@ -360,7 +482,7 @@ struct NutritionAddFoodView: View {
         }
     }
 
-    private var searchList: some View {
+    private var savedList: some View {
         let foods = viewModel.filteredCustomFoods(nutrition.customFoods)
         let recipes = viewModel.filteredRecipes(nutrition.recipes)
         return List {
@@ -368,7 +490,7 @@ struct NutritionAddFoodView: View {
 
             if nutrition.customFoods.isEmpty && nutrition.recipes.isEmpty {
                 emptyState("Nothing saved yet",
-                           "Build custom foods and recipes to log them in one tap.",
+                           "Build custom foods and recipes from the Search tab to log them in one tap.",
                            systemImage: "tray")
             }
 
@@ -408,27 +530,8 @@ struct NutritionAddFoodView: View {
                 }
             }
 
-            Section {
-                Button {
-                    showLibrary = true
-                } label: {
-                    Label("Browse food database", systemImage: "square.grid.2x2")
-                }
-                Button {
-                    showFoodEditor = true
-                } label: {
-                    Label("New custom food", systemImage: "fork.knife")
-                }
-                Button {
-                    showRecipeEditor = true
-                } label: {
-                    Label("New recipe from ingredients", systemImage: "list.bullet.rectangle")
-                }
-            } header: {
-                Text("Add & create")
-            }
         }
-        .searchable(text: $viewModel.searchText, prompt: "Search foods and recipes")
+        .searchable(text: $viewModel.searchText, prompt: "Search saved foods and recipes")
     }
 
     private var mealAndServingsHeader: some View {

@@ -128,7 +128,7 @@ struct FoodLibraryBrowserView: View {
 
 // MARK: - Ingredient portion sheet
 
-private struct IngredientPortionSheet: View {
+struct IngredientPortionSheet: View {
     let ingredient: LibraryIngredient
     var onAdd: (String, MacroBreakdown) -> Void
 
@@ -208,7 +208,7 @@ private struct IngredientPortionSheet: View {
 
 // MARK: - Meal portion sheet
 
-private struct MealPortionSheet: View {
+struct MealPortionSheet: View {
     let meal: LibraryMeal
     var onAdd: (String, MacroBreakdown) -> Void
 
