@@ -187,6 +187,11 @@ struct ProfileSettingsView: View {
             } label: {
                 Label("Privacy policy", systemImage: "lock.shield")
             }
+            NavigationLink {
+                TermsView()
+            } label: {
+                Label("Terms of use", systemImage: "doc.text")
+            }
         }
     }
 

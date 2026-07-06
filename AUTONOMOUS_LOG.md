@@ -14,3 +14,4 @@ change.
 | 6 | 2026-07-05 | ios | Theme, RestoreView, Nutrition/Activity | UI refresh from the dashboard task: blue and white palette, distinct skincare icon, and removed redundant empty-state log buttons. | ✓ build |
 | 7 | 2026-07-05 | ios | Focus/ | Focus Lock: commitment-based app blocking via Family Controls / Screen Time, reached from Restore. Needs a real device + entitlement approval. | ✓ build |
 | 8 | 2026-07-05 | ios, firebase | AuthManager, SignInView | Email and password sign up alongside Sign in with Apple; enabled the Email/Password provider. | ✓ build |
+| 9 | 2026-07-05 | ios | Legal, Profile | Self-directed: in-app Terms of Use screen + time-of-day personalized greeting. | ✓ build |

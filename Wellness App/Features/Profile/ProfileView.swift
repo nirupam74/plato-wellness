@@ -136,7 +136,9 @@ private struct ProfileHeaderView: View {
 
     private var greetingName: String {
         let name = user.profile?.firstName ?? ""
-        return name.isEmpty ? "Welcome" : name
+        let hour = Calendar.current.component(.hour, from: Date())
+        let part = hour < 12 ? "Good morning" : (hour < 18 ? "Good afternoon" : "Good evening")
+        return name.isEmpty ? part : "\(part), \(name)"
     }
 
     private var initials: String {
