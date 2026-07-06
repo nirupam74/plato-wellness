@@ -16,3 +16,4 @@ change.
 | 8 | 2026-07-05 | ios, firebase | AuthManager, SignInView | Email and password sign up alongside Sign in with Apple; enabled the Email/Password provider. | ✓ build |
 | 9 | 2026-07-05 | ios | Legal, Profile | Self-directed: in-app Terms of Use screen + time-of-day personalized greeting. | ✓ build |
 | 10 | 2026-07-05 | ios | Nutrition, Activity, Restore | Self-directed: haptic feedback on food, workout, sport, and mood logging. | ✓ build |
+| 11 | 2026-07-05 | ios | UserStore | Self-directed: bounded the progress-photos Firestore listener (order + limit). | ✓ build |

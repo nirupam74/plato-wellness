@@ -74,12 +74,15 @@ final class UserStore {
             }
         )
         listeners.append(
-            db.collection("users/\(uid)/progressPhotos").addSnapshotListener { [weak self] snap, _ in
-                guard let snap else { return }
-                self?.progressPhotos = snap.documents
-                    .compactMap { try? $0.data(as: ProgressPhoto.self) }
-                    .sorted { $0.recordedAt > $1.recordedAt }
-            }
+            db.collection("users/\(uid)/progressPhotos")
+                .order(by: "recordedAt", descending: true)
+                .limit(to: 300)
+                .addSnapshotListener { [weak self] snap, _ in
+                    guard let snap else { return }
+                    self?.progressPhotos = snap.documents
+                        .compactMap { try? $0.data(as: ProgressPhoto.self) }
+                        .sorted { $0.recordedAt > $1.recordedAt }
+                }
         )
     }
 
