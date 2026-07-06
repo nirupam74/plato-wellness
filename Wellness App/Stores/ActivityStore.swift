@@ -14,6 +14,8 @@ import FirebaseFirestore
 final class ActivityStore {
     var entries: [ActivityEntry]
     var dailySummaries: [DailyActivitySummary]
+    /// Saved activities the user can pick again next time.
+    var templates: [ActivityTemplate] = []
 
     private let db = Firestore.firestore()
     private var uid: String?
@@ -32,7 +34,7 @@ final class ActivityStore {
         listeners = []
 
         guard let uid else {
-            entries = []; dailySummaries = []
+            entries = []; dailySummaries = []; templates = []
             return
         }
         // Steps and active energy come from HealthKit, wired later.
@@ -46,6 +48,33 @@ final class ActivityStore {
                     self?.entries = snap.documents.compactMap { try? $0.data(as: ActivityEntry.self) }
                 }
         )
+        listeners.append(
+            db.collection("users/\(uid)/activityTemplates")
+                .order(by: "createdAt", descending: true)
+                .limit(to: 100)
+                .addSnapshotListener { [weak self] snap, _ in
+                    guard let snap else { return }
+                    self?.templates = snap.documents.compactMap { try? $0.data(as: ActivityTemplate.self) }
+                }
+        )
+    }
+
+    // MARK: - Templates
+
+    func saveTemplate(_ template: ActivityTemplate) {
+        if let uid {
+            try? db.collection("users/\(uid)/activityTemplates").document(template.id).setData(from: template)
+        } else {
+            templates.insert(template, at: 0)
+        }
+    }
+
+    func removeTemplate(_ template: ActivityTemplate) {
+        if let uid {
+            db.collection("users/\(uid)/activityTemplates").document(template.id).delete()
+        } else {
+            templates.removeAll { $0.id == template.id }
+        }
     }
 
     // MARK: - Mutations

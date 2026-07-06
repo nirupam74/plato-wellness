@@ -2,37 +2,65 @@
 //  ActivitySportsView.swift
 //  Wellness App
 //
-//  Quick logging for recreational sports. Duration plus a low / medium / high
-//  intensity picker scales the MET based calorie estimate for ActivityType.sport.
+//  Rich sport logging: pick from a broad sport catalogue, capture the context
+//  that affects effort (intensity, venue, indoor/outdoor, who you played with,
+//  and position where it applies), see a live MET based estimate, and optionally
+//  save the setup as a template to reuse next time.
 //
 
 import SwiftUI
 
 @Observable
 final class ActivitySportsViewModel {
-    var name: String = ""
+    var sport: Sport = .soccer
     var durationMin: Int = 45
     var intensity: ActivityIntensity = .medium
-
-    private var trimmedName: String {
-        name.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    var venue: SportVenue = .field
+    var isOutdoor: Bool = true
+    var participants: Int = 0
+    var position: String = ""
+    var saveAsTemplate = false
 
     var canSave: Bool { durationMin > 0 }
 
-    /// Base sport estimate scaled by the chosen intensity.
     func estimatedBurn(weightKg: Double) -> Int {
-        let base = HealthMath.estimatedBurn(type: .sport, minutes: durationMin, weightKg: weightKg)
-        return Int((Double(base) * intensity.multiplier).rounded())
+        HealthMath.sportBurn(sport: sport, minutes: durationMin, weightKg: weightKg, intensity: intensity)
+    }
+
+    private func details() -> ActivityDetails {
+        ActivityDetails(sport: SportDetails(
+            sport: sport,
+            intensity: intensity,
+            venue: venue,
+            isOutdoor: isOutdoor,
+            participants: max(0, participants),
+            position: position.trimmingCharacters(in: .whitespacesAndNewlines)
+        ))
     }
 
     func makeEntry(weightKg: Double) -> ActivityEntry {
         ActivityEntry(
             type: .sport,
-            name: trimmedName.isEmpty ? "Sport" : trimmedName,
+            name: sport.label,
             durationMin: durationMin,
-            caloriesBurned: estimatedBurn(weightKg: weightKg)
+            caloriesBurned: estimatedBurn(weightKg: weightKg),
+            details: details()
         )
+    }
+
+    func makeTemplate() -> ActivityTemplate {
+        ActivityTemplate(name: sport.label, type: .sport, durationMin: durationMin, details: details())
+    }
+
+    func apply(_ template: ActivityTemplate) {
+        durationMin = template.durationMin
+        guard let s = template.details?.sport else { return }
+        sport = s.sport
+        intensity = s.intensity
+        venue = s.venue
+        isOutdoor = s.isOutdoor
+        participants = s.participants
+        position = s.position
     }
 }
 
@@ -43,12 +71,36 @@ struct ActivitySportsView: View {
     @State private var viewModel = ActivitySportsViewModel()
 
     private var weightKg: Double { user.profile?.currentWeightKg ?? 70 }
+    private var savedSports: [ActivityTemplate] { activity.templates.filter { $0.type == .sport } }
 
     var body: some View {
         NavigationStack {
             Form {
+                if !savedSports.isEmpty {
+                    Section("Saved sports") {
+                        ForEach(savedSports) { template in
+                            Button {
+                                viewModel.apply(template)
+                                Haptics.tap()
+                            } label: {
+                                Label(templateLabel(template),
+                                      systemImage: (template.details?.sport?.sport ?? .other).systemImage)
+                            }
+                        }
+                        .onDelete { offsets in
+                            offsets.map { savedSports[$0] }.forEach(activity.removeTemplate)
+                        }
+                    }
+                }
+
                 Section("Sport") {
-                    TextField("Name", text: $viewModel.name, prompt: Text("Basketball, tennis, soccer..."))
+                    Picker("Sport", selection: $viewModel.sport) {
+                        ForEach(Sport.allCases) { sport in
+                            Label(sport.label, systemImage: sport.systemImage).tag(sport)
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
+
                     Stepper(value: $viewModel.durationMin, in: 1...600, step: 5) {
                         LabeledContent("Duration", value: "\(viewModel.durationMin) min")
                     }
@@ -63,6 +115,25 @@ struct ActivitySportsView: View {
                     .pickerStyle(.segmented)
                 }
 
+                Section("Where") {
+                    Picker("Venue", selection: $viewModel.venue) {
+                        ForEach(SportVenue.allCases) { venue in
+                            Text(venue.label).tag(venue)
+                        }
+                    }
+                    Toggle("Outdoors", isOn: $viewModel.isOutdoor)
+                }
+
+                Section("Who") {
+                    Stepper(value: $viewModel.participants, in: 0...50) {
+                        LabeledContent("Played with",
+                                       value: viewModel.participants == 0 ? "Solo / practice" : "\(viewModel.participants) people")
+                    }
+                    if viewModel.sport.usesPosition {
+                        TextField("Position", text: $viewModel.position, prompt: Text("Forward, guard, pitcher..."))
+                    }
+                }
+
                 Section {
                     HStack {
                         Label("Estimated burn", systemImage: "flame.fill")
@@ -72,8 +143,9 @@ struct ActivitySportsView: View {
                             .font(.headline)
                             .contentTransition(.numericText())
                     }
+                    Toggle("Save this sport to reuse", isOn: $viewModel.saveAsTemplate)
                 } footer: {
-                    Text("Estimated from duration and intensity. You can refine it later.")
+                    Text("Estimated from the sport, duration, and intensity. You can refine it later.")
                 }
             }
             .navigationTitle("Log sport")
@@ -83,16 +155,28 @@ struct ActivitySportsView: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        activity.add(viewModel.makeEntry(weightKg: weightKg))
-                        Haptics.success()
-                        dismiss()
-                    }
-                    .disabled(!viewModel.canSave)
+                    Button("Save") { save() }
+                        .disabled(!viewModel.canSave)
                 }
             }
         }
         .tint(Theme.activity)
+    }
+
+    private func templateLabel(_ template: ActivityTemplate) -> String {
+        if let s = template.details?.sport {
+            return "\(template.name) · \(s.intensity.label.lowercased()) · \(template.durationMin) min"
+        }
+        return "\(template.name) · \(template.durationMin) min"
+    }
+
+    private func save() {
+        activity.add(viewModel.makeEntry(weightKg: weightKg))
+        if viewModel.saveAsTemplate {
+            activity.saveTemplate(viewModel.makeTemplate())
+        }
+        Haptics.success()
+        dismiss()
     }
 }
 

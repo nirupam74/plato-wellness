@@ -13,7 +13,7 @@ import Observation
 final class ActivityViewModel {
     /// The log sheet currently presented, if any.
     enum Sheet: String, Identifiable {
-        case workout, sport
+        case workout, sport, strength
         var id: String { rawValue }
     }
 
@@ -21,6 +21,7 @@ final class ActivityViewModel {
 
     func presentWorkout() { activeSheet = .workout }
     func presentSport() { activeSheet = .sport }
+    func presentStrength() { activeSheet = .strength }
 
     /// Most recent workouts first, capped so the list stays scannable.
     func recentEntries(_ entries: [ActivityEntry], limit: Int = 30) -> [ActivityEntry] {

@@ -119,4 +119,38 @@ enum HealthMath {
         let perMinute = type.metValue * 3.5 * weightKg / 200
         return Int((perMinute * Double(minutes)).rounded())
     }
+
+    /// Calories for a given MET value over a duration.
+    static func burn(met: Double, minutes: Int, weightKg: Double) -> Int {
+        let perMinute = met * 3.5 * weightKg / 200
+        return Int((perMinute * Double(minutes)).rounded())
+    }
+
+    /// Sport-specific estimate: the sport's MET scaled by the chosen intensity.
+    static func sportBurn(sport: Sport, minutes: Int, weightKg: Double, intensity: ActivityIntensity) -> Int {
+        burn(met: sport.met * intensity.multiplier, minutes: minutes, weightKg: weightKg)
+    }
+
+    /// Swim estimate. Open water and higher intensity raise the MET.
+    static func swimBurn(minutes: Int, weightKg: Double, intensity: ActivityIntensity, openWater: Bool) -> Int {
+        let base: Double
+        switch intensity {
+        case .low:    base = 5.3
+        case .medium: base = 7.0
+        case .high:   base = 9.8
+        }
+        return burn(met: base + (openWater ? 0.5 : 0), minutes: minutes, weightKg: weightKg)
+    }
+
+    /// Strength-training estimate. Vigorous free-weight work is ~6 MET, moderate
+    /// ~4, light ~3.5.
+    static func strengthBurn(minutes: Int, weightKg: Double, intensity: ActivityIntensity) -> Int {
+        let met: Double
+        switch intensity {
+        case .low:    met = 3.5
+        case .medium: met = 5.0
+        case .high:   met = 6.0
+        }
+        return burn(met: met, minutes: minutes, weightKg: weightKg)
+    }
 }

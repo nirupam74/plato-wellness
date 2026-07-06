@@ -57,6 +57,11 @@ struct ActivityView: View {
                             Label("Log workout", systemImage: "figure.run")
                         }
                         Button {
+                            viewModel.presentStrength()
+                        } label: {
+                            Label("Log strength", systemImage: "dumbbell")
+                        }
+                        Button {
                             viewModel.presentSport()
                         } label: {
                             Label("Log sport", systemImage: "sportscourt")
@@ -69,8 +74,9 @@ struct ActivityView: View {
             }
             .sheet(item: $viewModel.activeSheet) { sheet in
                 switch sheet {
-                case .workout: ActivityLogWorkoutView()
-                case .sport:   ActivitySportsView()
+                case .workout:  ActivityLogWorkoutView()
+                case .sport:    ActivitySportsView()
+                case .strength: ActivityStrengthView()
                 }
             }
         }

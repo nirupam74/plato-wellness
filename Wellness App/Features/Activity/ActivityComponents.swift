@@ -13,7 +13,7 @@ import SwiftUI
 
 /// Recreational sport effort level. Scales the MET based calorie estimate so a
 /// casual kickabout and a hard match log different burns for the same minutes.
-enum ActivityIntensity: String, CaseIterable, Identifiable {
+enum ActivityIntensity: String, Codable, CaseIterable, Identifiable {
     case low, medium, high
     var id: String { rawValue }
 
@@ -69,6 +69,29 @@ struct ActivityWorkoutRow: View {
         return parts.joined(separator: " . ")
     }
 
+    /// A short second line describing rich detail when present.
+    private var detailSummary: String? {
+        guard let details = entry.details else { return nil }
+        if let s = details.sport {
+            var parts = [s.intensity.label.lowercased()]
+            parts.append(s.isOutdoor ? "outdoor \(s.venue.label.lowercased())" : "indoor \(s.venue.label.lowercased())")
+            if s.participants > 0 { parts.append("\(s.participants) players") }
+            if !s.position.isEmpty { parts.append(s.position) }
+            return parts.joined(separator: " . ")
+        }
+        if let s = details.swim {
+            var parts = [s.poolType.label]
+            if let len = s.poolLengthM { parts.append("\(len) m") }
+            parts.append(s.intensity.label.lowercased())
+            return parts.joined(separator: " . ")
+        }
+        if let lifts = details.strength, !lifts.isEmpty {
+            let sets = lifts.reduce(0) { $0 + $1.sets.count }
+            return "\(lifts.count) exercises . \(sets) sets"
+        }
+        return nil
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: entry.type.systemImage)
@@ -89,6 +112,12 @@ struct ActivityWorkoutRow: View {
                 Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let detailSummary {
+                    Text(detailSummary)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
             }
 
             Spacer(minLength: 8)

@@ -17,6 +17,11 @@ final class ActivityLogWorkoutViewModel {
     var distanceText: String = ""
     var heartRateText: String = ""
 
+    // Swim specifics, used when type == .swim.
+    var poolType: PoolType = .indoorPool
+    var poolLengthText: String = ""
+    var swimIntensity: ActivityIntensity = .medium
+
     private var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -29,15 +34,37 @@ final class ActivityLogWorkoutViewModel {
         }
     }
 
+    var isSwim: Bool { type == .swim }
+
     var canSave: Bool { durationMin > 0 }
 
     /// Fill calories from the MET estimate for the current type and duration.
     func estimate(weightKg: Double) {
-        caloriesBurned = HealthMath.estimatedBurn(
-            type: type,
-            minutes: durationMin,
-            weightKg: weightKg
-        )
+        if isSwim {
+            caloriesBurned = HealthMath.swimBurn(
+                minutes: durationMin,
+                weightKg: weightKg,
+                intensity: swimIntensity,
+                openWater: poolType == .openWater
+            )
+        } else {
+            caloriesBurned = HealthMath.estimatedBurn(
+                type: type,
+                minutes: durationMin,
+                weightKg: weightKg
+            )
+        }
+    }
+
+    private func swimDetails() -> ActivityDetails? {
+        guard isSwim else { return nil }
+        let length = Int(poolLengthText)
+        return ActivityDetails(swim: SwimDetails(
+            poolType: poolType,
+            poolLengthM: length.flatMap { $0 > 0 ? $0 : nil },
+            laps: nil,
+            intensity: swimIntensity
+        ))
     }
 
     func makeEntry() -> ActivityEntry {
@@ -49,7 +76,8 @@ final class ActivityLogWorkoutViewModel {
             durationMin: durationMin,
             caloriesBurned: max(0, caloriesBurned),
             distanceKm: distance.flatMap { $0 > 0 ? $0 : nil },
-            avgHeartRate: Int(heartRateText).flatMap { $0 > 0 ? $0 : nil }
+            avgHeartRate: Int(heartRateText).flatMap { $0 > 0 ? $0 : nil },
+            details: swimDetails()
         )
     }
 }
@@ -107,6 +135,31 @@ struct ActivityLogWorkoutView: View {
                                 .frame(maxWidth: 80)
                             Text("km").foregroundStyle(.secondary)
                         }
+                    }
+                }
+
+                if viewModel.isSwim {
+                    Section("Swim") {
+                        Picker("Water", selection: $viewModel.poolType) {
+                            ForEach(PoolType.allCases) { type in
+                                Text(type.label).tag(type)
+                            }
+                        }
+                        HStack {
+                            Text("Pool length")
+                            Spacer()
+                            TextField("Optional", text: $viewModel.poolLengthText)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(maxWidth: 80)
+                            Text("m").foregroundStyle(.secondary)
+                        }
+                        Picker("Intensity", selection: $viewModel.swimIntensity) {
+                            ForEach(ActivityIntensity.allCases) { level in
+                                Text(level.label).tag(level)
+                            }
+                        }
+                        .pickerStyle(.segmented)
                     }
                 }
 

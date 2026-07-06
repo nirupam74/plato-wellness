@@ -18,6 +18,8 @@ struct ActivityEntry: Codable, Identifiable {
     var avgHeartRate: Int?
     var loggedAt: Date
     var fromHealthKit: Bool
+    // Optional so entries saved before rich detail existed still decode.
+    var details: ActivityDetails?
 
     init(
         id: String = UUID().uuidString,
@@ -28,7 +30,8 @@ struct ActivityEntry: Codable, Identifiable {
         distanceKm: Double? = nil,
         avgHeartRate: Int? = nil,
         loggedAt: Date = Date(),
-        fromHealthKit: Bool = false
+        fromHealthKit: Bool = false,
+        details: ActivityDetails? = nil
     ) {
         self.id = id
         self.type = type
@@ -39,6 +42,7 @@ struct ActivityEntry: Codable, Identifiable {
         self.avgHeartRate = avgHeartRate
         self.loggedAt = loggedAt
         self.fromHealthKit = fromHealthKit
+        self.details = details
     }
 }
 
