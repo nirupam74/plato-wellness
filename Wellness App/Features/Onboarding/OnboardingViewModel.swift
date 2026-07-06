@@ -233,7 +233,7 @@ final class OnboardingViewModel {
         targetsPrepared = true
     }
 
-    // MARK: - HealthKit and notifications (placeholders)
+    // MARK: - HealthKit and notification choices
 
     var healthKitRequested = false
     var notificationsEnabled = false

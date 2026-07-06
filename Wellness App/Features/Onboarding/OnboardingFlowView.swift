@@ -12,6 +12,7 @@ import SwiftUI
 
 struct OnboardingFlowView: View {
     @Environment(UserStore.self) private var user
+    @Environment(NotificationManager.self) private var notifications
 
     @State private var vm = OnboardingViewModel()
 
@@ -135,7 +136,31 @@ struct OnboardingFlowView: View {
         if let measurement = vm.makeMeasurement() {
             user.addMeasurement(measurement)
         }
+        applyNotificationChoices()
         onComplete?()
+    }
+
+    /// Persist the reminder choices from onboarding to the same notify.* keys
+    /// Settings uses, then request the system prompt and schedule if the user
+    /// opted in. Without this the onboarding toggles were silently discarded.
+    private func applyNotificationChoices() {
+        let defaults = UserDefaults.standard
+        let enabled = vm.notificationsEnabled
+        defaults.set(enabled && vm.mealReminders, forKey: "notify.meals")
+        defaults.set(enabled && vm.moveReminders, forKey: "notify.activity")
+        defaults.set(enabled && vm.sleepReminders, forKey: "notify.sleep")
+        defaults.set(enabled, forKey: "notify.water")
+
+        guard enabled else { return }
+        Task {
+            await notifications.requestAuthorization()
+            notifications.reschedule(.init(
+                meals: vm.mealReminders,
+                water: true,
+                bedtime: vm.sleepReminders,
+                move: vm.moveReminders
+            ))
+        }
     }
 }
 

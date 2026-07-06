@@ -117,7 +117,7 @@ struct OnboardingHealthKitStep: View {
     }
 }
 
-// MARK: - 11. Notifications (placeholder)
+// MARK: - 11. Notifications
 
 struct OnboardingNotificationsStep: View {
     @Bindable var vm: OnboardingViewModel
@@ -150,8 +150,8 @@ struct OnboardingNotificationsStep: View {
 
                 OnboardingCallout(
                     kind: .info,
-                    title: "Placeholder",
-                    message: "The system notification prompt is wired up later. Your choices here are saved as preferences."
+                    title: "Your choice",
+                    message: "If you turn reminders on, we will ask permission to send notifications when you finish setup. You can fine tune or turn these off anytime in Settings."
                 )
             }
         }
