@@ -39,3 +39,4 @@ change.
 | 2026-07-06 01:35 | self-directed | Onboarding Connect Health now calls real HealthKitManager.requestAuthorization + honest copy (was placeholder). Deferred (risky unattended): onboarding notifications prompt wiring + RootView sign-in-vs-onboarding HealthKit timing | 36dcaf2 |
 | 2026-07-06 01:42 | self-directed | FIX: onboarding reminder choices were silently discarded; finish() now persists notify.* prefs, requests notification auth, and schedules (was dead placeholder). Fixed stale MARKs | 7f493e7 |
 | 2026-07-06 01:50 | self-directed | FIX: onboarding Foods to avoid was silently discarded (no UserProfile field); added optional foodsToAvoid to model + makeProfile. Follow-up: surface allergies/foodsToAvoid in profile editing | b935287 |
+| 2026-07-06 01:57 | self-directed | Diet type / allergies / foods-to-avoid now viewable + editable in Goals & targets (were onboarding-only, unreachable after); completes the foodsToAvoid fix | 080de43 |
