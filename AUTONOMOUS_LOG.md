@@ -48,3 +48,4 @@ change.
 | 2026-07-06 02:38 | self-directed | FIX: custom foods + recipes were undeletable; added NutritionStore.removeCustomFood/removeRecipe + swipe-to-delete. Mindful sessions have no per-session list UI (skipped); body measurements delete still pending | b0feb51 |
 | 2026-07-06 02:45 | self-directed | FIX: body measurements were undeletable; added UserStore.removeMeasurement (no weight recompute) + History section with swipe-to-delete. DELETION SWEEP COMPLETE across all log types | 0ff1963 |
 | 2026-07-06 02:53 | self-directed | FIX: progress photos were undeletable + footer falsely claimed on-device-only; added UserStore.removePhoto (Storage+Firestore) + context-menu delete + honest privacy copy | c5d2776 |
+| 2026-07-06 03:00 | self-directed | Corrected 3 stale stub comments (sleep import, settings actions, daily activity source); audited HealthMath + streak logic and confirmed correct + DST-safe (no change needed) | 22b2af8 |
