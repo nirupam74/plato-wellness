@@ -60,14 +60,16 @@ final class NutritionAddFoodViewModel {
 
     func makeManualEntry() -> FoodEntry? {
         guard canSaveManual, let calories else { return nil }
+        // Clamp to non-negative so a stray negative value can never subtract
+        // from the day's totals.
         return FoodEntry(
             name: name.trimmingCharacters(in: .whitespaces),
             mealType: meal,
-            servings: servings,
-            calories: calories,
-            proteinG: protein,
-            carbsG: carbs,
-            fatG: fat,
+            servings: max(0, servings),
+            calories: max(0, calories),
+            proteinG: max(0, protein),
+            carbsG: max(0, carbs),
+            fatG: max(0, fat),
             source: .manual
         )
     }

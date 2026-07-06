@@ -165,12 +165,14 @@ final class NutritionCustomFoodEditorViewModel {
     func makeFood() -> CustomFood? {
         guard let calories = Int(caloriesText),
               !name.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+        // Clamp to non-negative: no food has negative calories or macros, and a
+        // negative value would subtract from the user's daily totals.
         return CustomFood(
             name: name.trimmingCharacters(in: .whitespaces),
-            calories: calories,
-            proteinG: Double(proteinText) ?? 0,
-            carbsG: Double(carbsText) ?? 0,
-            fatG: Double(fatText) ?? 0,
+            calories: max(0, calories),
+            proteinG: max(0, Double(proteinText) ?? 0),
+            carbsG: max(0, Double(carbsText) ?? 0),
+            fatG: max(0, Double(fatText) ?? 0),
             isFavorite: isFavorite
         )
     }
