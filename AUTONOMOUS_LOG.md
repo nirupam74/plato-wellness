@@ -17,3 +17,4 @@ change.
 | 9 | 2026-07-05 | ios | Legal, Profile | Self-directed: in-app Terms of Use screen + time-of-day personalized greeting. | ✓ build |
 | 10 | 2026-07-05 | ios | Nutrition, Activity, Restore | Self-directed: haptic feedback on food, workout, sport, and mood logging. | ✓ build |
 | 11 | 2026-07-05 | ios | UserStore | Self-directed: bounded the progress-photos Firestore listener (order + limit). | ✓ build |
+| 12 | 2026-07-05 | ios | Components | Self-directed: StatTile combines into one VoiceOver element with accessibilityValue. | ✓ build |
