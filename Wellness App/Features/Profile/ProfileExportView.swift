@@ -13,13 +13,14 @@ struct ProfileExportView: View {
     @Environment(NutritionStore.self) private var nutrition
     @Environment(ActivityStore.self) private var activity
     @Environment(RestoreStore.self) private var restore
+    @Environment(CompanionStore.self) private var companion
 
     @State private var format: ProfileExportFormat = .json
     @State private var exportURL: URL?
     @State private var errorMessage: String?
 
     private var exporter: ProfileExporter {
-        ProfileExporter(user: user, nutrition: nutrition, activity: activity, restore: restore)
+        ProfileExporter(user: user, nutrition: nutrition, activity: activity, restore: restore, companion: companion)
     }
 
     var body: some View {
@@ -46,6 +47,7 @@ struct ProfileExportView: View {
                 countRow("Mood check-ins", restore.moodEntries.count, "face.smiling")
                 countRow("Mindful sessions", restore.sessions.count, "brain.head.profile")
                 countRow("Body measurements", user.measurements.count, "ruler")
+                countRow("Companion messages", companion.messages.count, "bubble.left.and.bubble.right")
             }
 
             Section {

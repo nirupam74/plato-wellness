@@ -49,6 +49,7 @@ struct ProfileExportSnapshot: Codable {
     var sleepEntries: [SleepEntry]
     var moodEntries: [MoodEntry]
     var restoreSessions: [RestoreSession]
+    var companionMessages: [CompanionMessage]
 }
 
 // MARK: - Exporter
@@ -58,6 +59,7 @@ struct ProfileExporter {
     let nutrition: NutritionStore
     let activity: ActivityStore
     let restore: RestoreStore
+    let companion: CompanionStore
 
     // MARK: Snapshot assembly
 
@@ -72,7 +74,8 @@ struct ProfileExporter {
             waterEntries: restore.waterEntries,
             sleepEntries: restore.sleepEntries,
             moodEntries: restore.moodEntries,
-            restoreSessions: restore.sessions
+            restoreSessions: restore.sessions,
+            companionMessages: companion.messages
         )
     }
 
@@ -158,6 +161,12 @@ struct ProfileExporter {
                      m.weightKg.map(num) ?? "", m.bodyFatPercent.map(num) ?? "",
                      m.waistCm.map(num) ?? "", m.hipsCm.map(num) ?? "", m.chestCm.map(num) ?? "",
                      m.armCm.map(num) ?? "", m.thighCm.map(num) ?? "", m.neckCm.map(num) ?? ""]
+                })
+
+        section("Companion messages",
+                header: ["date", "role", "text", "flagged_for_crisis"],
+                rows: companion.messages.sorted { $0.createdAt < $1.createdAt }.map { m in
+                    [iso.string(from: m.createdAt), m.role.rawValue, m.text, "\(m.flaggedForCrisis)"]
                 })
 
         return out
