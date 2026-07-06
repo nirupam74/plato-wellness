@@ -23,3 +23,4 @@ change.
 | 15 | 2026-07-05 | ios | ProfileView | Self-directed: streak-milestone celebration in the Profile header. | ✓ build |
 | 2026-07-06 00:00 | self-directed | About section in Settings showing app version + build number (App Store expectation, VoiceOver-combined) | dffda53 |
 | 2026-07-06 00:05 | self-directed | Per-bar VoiceOver accessibility on steps + active-energy charts (date + value per day, navigable) | 62c4243 |
+| 2026-07-06 00:11 | self-directed | Per-mark VoiceOver a11y on sleep (bars) + mood (points) trend charts | bc4c283 |
