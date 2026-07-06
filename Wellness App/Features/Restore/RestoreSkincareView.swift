@@ -74,7 +74,7 @@ struct RestoreSkincareChecklistCard: View {
                 }
                 if steps.isEmpty {
                     ContentUnavailableView {
-                        Label("No \(time.label.lowercased()) steps yet", systemImage: "sparkles")
+                        Label("No \(time.label.lowercased()) steps yet", systemImage: "hands.and.sparkles.fill")
                     } description: {
                         Text("Add steps from the edit button to start this routine.")
                     }

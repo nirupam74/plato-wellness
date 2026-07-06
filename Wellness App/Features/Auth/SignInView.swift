@@ -17,7 +17,7 @@ struct SignInView: View {
 
             Image(systemName: "leaf.circle.fill")
                 .font(.system(size: 72))
-                .foregroundStyle(Theme.restore)
+                .foregroundStyle(Theme.accent)
                 .accessibilityHidden(true)
 
             VStack(spacing: 8) {

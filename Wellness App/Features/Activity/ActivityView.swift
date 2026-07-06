@@ -82,10 +82,7 @@ struct ActivityView: View {
                 ContentUnavailableView {
                     Label("No workouts yet", systemImage: "figure.run.circle")
                 } description: {
-                    Text("Log a workout or a sport to see it here.")
-                } actions: {
-                    Button("Log workout") { viewModel.presentWorkout() }
-                        .buttonStyle(.borderedProminent)
+                    Text("Tap the plus button above to log a workout or a sport.")
                 }
                 .listRowBackground(Color.clear)
             } else {

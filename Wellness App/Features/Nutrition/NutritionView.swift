@@ -41,10 +41,7 @@ struct NutritionView: View {
                         ContentUnavailableView {
                             Label("No food logged yet", systemImage: "fork.knife")
                         } description: {
-                            Text("Tap the plus button to log your first meal of the day.")
-                        } actions: {
-                            Button("Log food") { viewModel.presentAddFood() }
-                                .buttonStyle(.borderedProminent)
+                            Text("Tap the plus button above to log your first meal of the day.")
                         }
                         .listRowBackground(Color.clear)
                     }

@@ -10,3 +10,5 @@ change.
 | 2 | 2026-07-05 | firebase, ios | functions, rules, app | Wired the whole app to live Firebase: Auth (Sign in with Apple), Firestore-backed stores, Storage, App Check, companion Cloud Function. Deployed backend. | ✓ build + launch |
 | 3 | 2026-07-05 | ios, healthkit | HealthKitManager, NotificationManager, ProgressPhoto | HealthKit read/write, local notification reminders, and progress-photo upload to Storage. | ✓ build + launch |
 | 4 | 2026-07-05 | security, ios | functions, rules, ProfileSettingsView, PrivacyInfo | App Store readiness: in-app account deletion (deleteAccount function + UI), PrivacyInfo.xcprivacy manifest, hardened Firestore rules, accessibility options, and in-app Help + Privacy Policy. | ✓ build + deploy |
+| 5 | 2026-07-05 | ios | Stores | Bounded the busy Firestore listeners (food, activity, water, sleep, mood, sessions) with ordering + limits to cap reads for long histories. | ✓ build |
+| 6 | 2026-07-05 | ios | Theme, RestoreView, Nutrition/Activity | UI refresh from the dashboard task: blue and white palette, distinct skincare icon, and removed redundant empty-state log buttons. | ✓ build |

@@ -120,7 +120,7 @@ private struct RestoreRitualLinks: View {
             NavigationLink {
                 RestoreSkincareView()
             } label: {
-                RestoreRitualRow(title: "Skincare", subtitle: skincareSubtitle, systemImage: "sparkles")
+                RestoreRitualRow(title: "Skincare", subtitle: skincareSubtitle, systemImage: "hands.and.sparkles.fill")
             }
             NavigationLink {
                 RestoreMovementView()

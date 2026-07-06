@@ -2,20 +2,32 @@
 //  Theme.swift
 //  Wellness App
 //
-//  Single source of truth for color. One accent plus a semantic color per
-//  pillar (nutrition, activity, restore) so charts and progress read instantly.
-//  These literals are a starting point, promote them to the asset catalog with
-//  light and dark variants when the design system firms up.
+//  Single source of truth for color. A calm blue and white system: one hero
+//  blue, with each pillar a distinct but harmonious member of the blue family so
+//  the whole app reads as one palette on white and grouped backgrounds.
 //
 
 import SwiftUI
 
-enum Theme {
-    /// App accent. Falls back to the asset-catalog AccentColor.
-    static let accent = Color.accentColor
+extension Color {
+    /// Build a color from a 0xRRGGBB hex value.
+    init(hex: UInt) {
+        self.init(
+            .sRGB,
+            red: Double((hex >> 16) & 0xFF) / 255.0,
+            green: Double((hex >> 8) & 0xFF) / 255.0,
+            blue: Double(hex & 0xFF) / 255.0,
+            opacity: 1.0
+        )
+    }
+}
 
-    // Per-pillar semantic colors.
-    static let nutrition = Color(red: 0.95, green: 0.55, blue: 0.25) // warm amber
-    static let activity  = Color(red: 0.20, green: 0.65, blue: 0.85) // energetic blue
-    static let restore   = Color(red: 0.55, green: 0.45, blue: 0.85) // calm violet
+enum Theme {
+    /// App accent. The hero blue used for primary actions and highlights.
+    static let accent = Color(hex: 0x2F6BFF)
+
+    // Per-pillar colors, all in the blue family.
+    static let nutrition = Color(hex: 0x3B82F6) // blue
+    static let activity  = Color(hex: 0x0EA5E9) // sky
+    static let restore   = Color(hex: 0x6366F1) // indigo
 }
