@@ -53,3 +53,4 @@ change.
 | 2026-07-06 03:14 | self-directed | FIX: account-deletion failures were silent in Settings; now shown under Account (stale errors cleared on appear/before attempt) + footer notes recent-login requirement. Verified sign-in errors already surfaced | 539969d |
 | 2026-07-06 03:21 | self-directed | Clamp custom-food + manual food entry calories/macros/servings to non-negative on save (defense against negatives corrupting daily totals). Verified weight editor already guards <=0; catch blocks all handled | 9e7b4d5 |
 | 2026-07-06 03:28 | self-directed | Weight entry now validated to a sane 20-500 kg range (protects BMR/target math from fat-fingered values) with an inline hint | 571f9af |
+| 2026-07-06 04:32 | self-directed | SECURITY/PRIVACY FIX: Storage rules denied progress-photo deletes (request.resource null on delete), orphaning sensitive photos after removePhoto; split create/update vs delete. NEEDS firebase deploy --only storage | 48c600c |
