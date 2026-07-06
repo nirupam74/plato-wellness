@@ -26,6 +26,7 @@ struct Card<Content: View>: View {
 
 /// Circular progress ring, used for calories and macros vs target.
 struct MetricRing: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var progress: Double            // 0...1 and beyond (clamped visually)
     var tint: Color
     var lineWidth: CGFloat = 10
@@ -37,7 +38,7 @@ struct MetricRing: View {
                 .trim(from: 0, to: max(0, min(progress, 1)))
                 .stroke(tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-                .animation(.snappy, value: progress)
+                .animation(reduceMotion ? nil : .snappy, value: progress)
         }
         // Purely decorative: every caller pairs the ring with labeled text, so
         // hide it to avoid a meaningless VoiceOver stop.
