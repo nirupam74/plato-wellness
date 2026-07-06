@@ -26,6 +26,16 @@ nonisolated struct MacroBreakdown: Codable, Equatable {
             fatG: lhs.fatG + rhs.fatG
         )
     }
+
+    /// Macros multiplied by a factor (e.g. a portion size), rounded sensibly.
+    func scaled(_ factor: Double) -> MacroBreakdown {
+        MacroBreakdown(
+            calories: Int((Double(calories) * factor).rounded()),
+            proteinG: (proteinG * factor * 10).rounded() / 10,
+            carbsG: (carbsG * factor * 10).rounded() / 10,
+            fatG: (fatG * factor * 10).rounded() / 10
+        )
+    }
 }
 
 struct FoodEntry: Codable, Identifiable {

@@ -263,6 +263,11 @@ final class NutritionRecipeBuilderViewModel {
         ingredients.remove(atOffsets: offsets)
     }
 
+    /// Append an ingredient chosen from the built-in database.
+    func addLibraryIngredient(name: String, macros: MacroBreakdown) {
+        ingredients.append(RecipeIngredient(name: name, macros: macros))
+    }
+
     /// Live per-serving preview using the same math the model uses.
     var perServingPreview: MacroBreakdown {
         Recipe(name: name, servings: servings, ingredients: ingredients).perServing
@@ -281,6 +286,7 @@ struct NutritionRecipeEditor: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel = NutritionRecipeBuilderViewModel()
+    @State private var showLibrary = false
 
     var body: some View {
         NavigationStack {
@@ -318,6 +324,14 @@ struct NutritionRecipeEditor: View {
                 }
 
                 Section("Add ingredient") {
+                    Button {
+                        showLibrary = true
+                    } label: {
+                        Label("Add from food database", systemImage: "square.grid.2x2")
+                    }
+                }
+
+                Section("Or enter macros") {
                     TextField("Ingredient name", text: $viewModel.ingName)
                     NutritionNumberField(title: "Calories", text: $viewModel.ingCaloriesText, unit: "cal")
                     NutritionNumberField(title: "Protein", text: $viewModel.ingProteinText, unit: "g")
@@ -355,6 +369,11 @@ struct NutritionRecipeEditor: View {
                         }
                     }
                     .disabled(!viewModel.canSave)
+                }
+            }
+            .sheet(isPresented: $showLibrary) {
+                FoodLibraryBrowserView(title: "Add ingredient") { name, macros in
+                    viewModel.addLibraryIngredient(name: name, macros: macros)
                 }
             }
         }

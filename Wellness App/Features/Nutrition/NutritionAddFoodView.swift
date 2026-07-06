@@ -124,6 +124,7 @@ struct NutritionAddFoodView: View {
     @State private var scanIsError = false
     @State private var showFoodEditor = false
     @State private var showRecipeEditor = false
+    @State private var showLibrary = false
 
     init(initialMeal: MealType = .breakfast) {
         _viewModel = State(initialValue: NutritionAddFoodViewModel(meal: initialMeal))
@@ -169,6 +170,22 @@ struct NutritionAddFoodView: View {
             }
             .sheet(isPresented: $showFoodEditor) { NutritionCustomFoodEditor() }
             .sheet(isPresented: $showRecipeEditor) { NutritionRecipeEditor() }
+            .sheet(isPresented: $showLibrary) {
+                FoodLibraryBrowserView { name, macros in
+                    nutrition.add(FoodEntry(
+                        name: name,
+                        mealType: viewModel.meal,
+                        servings: 1,
+                        calories: macros.calories,
+                        proteinG: macros.proteinG,
+                        carbsG: macros.carbsG,
+                        fatG: macros.fatG,
+                        source: .database
+                    ))
+                    Haptics.success()
+                    dismiss()
+                }
+            }
         }
         .tint(Theme.nutrition)
     }
@@ -393,6 +410,11 @@ struct NutritionAddFoodView: View {
 
             Section {
                 Button {
+                    showLibrary = true
+                } label: {
+                    Label("Browse food database", systemImage: "square.grid.2x2")
+                }
+                Button {
                     showFoodEditor = true
                 } label: {
                     Label("New custom food", systemImage: "fork.knife")
@@ -403,7 +425,7 @@ struct NutritionAddFoodView: View {
                     Label("New recipe from ingredients", systemImage: "list.bullet.rectangle")
                 }
             } header: {
-                Text("Create")
+                Text("Add & create")
             }
         }
         .searchable(text: $viewModel.searchText, prompt: "Search foods and recipes")
