@@ -42,7 +42,7 @@ struct ActivityEntry: Codable, Identifiable {
     }
 }
 
-/// A single day of step and active-energy data (from HealthKit later, stubbed now).
+/// A single day of step and active-energy data, sourced from HealthKit.
 struct DailyActivitySummary: Codable, Identifiable {
     var id: String { ISO8601DateFormatter().string(from: date) }
     var date: Date

@@ -2,8 +2,8 @@
 //  RestoreSleepView.swift
 //  Wellness App
 //
-//  Sleep ritual: latest duration vs the user's goal, a 2 week trend chart, and
-//  manual logging. HealthKit import is stubbed for a later phase.
+//  Sleep ritual: latest duration vs the user's goal, a 2 week trend chart,
+//  manual logging, per-night deletion, and Apple Health import.
 //
 
 import SwiftUI

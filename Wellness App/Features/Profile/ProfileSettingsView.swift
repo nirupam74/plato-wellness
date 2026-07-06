@@ -4,8 +4,8 @@
 //
 //  Units, notifications, HealthKit, privacy, appearance, and account. Preferences
 //  that belong to the profile persist through the store; purely local ones use
-//  @AppStorage. HealthKit, companion deletion, and account actions are stubs
-//  wired up in later phases.
+//  @AppStorage. HealthKit sync, companion history deletion, and account deletion
+//  are all wired to their live backends.
 //
 
 import SwiftUI
