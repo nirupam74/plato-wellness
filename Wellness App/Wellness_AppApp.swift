@@ -32,6 +32,7 @@ struct Wellness_AppApp: App {
                 .environment(appState.companion)
                 .environment(appState.healthKit)
                 .environment(appState.notifications)
+                .environment(appState.focus)
                 .environment(auth)
         }
     }

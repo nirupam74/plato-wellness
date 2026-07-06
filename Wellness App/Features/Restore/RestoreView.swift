@@ -72,6 +72,11 @@ struct RestoreView: View {
 private struct RestoreRitualLinks: View {
     @Environment(RestoreStore.self) private var restore
     @Environment(UserStore.self) private var user
+    @Environment(FocusManager.self) private var focus
+
+    private var focusSubtitle: String {
+        focus.isLocked ? focus.remainingText : "Block distracting apps"
+    }
 
     private var sleepSubtitle: String {
         guard let latest = restore.latestSleep else { return "No sleep logged yet" }
@@ -126,6 +131,11 @@ private struct RestoreRitualLinks: View {
                 RestoreMovementView()
             } label: {
                 RestoreRitualRow(title: "Movement and breathwork", subtitle: movementSubtitle, systemImage: "figure.mind.and.body")
+            }
+            NavigationLink {
+                FocusLockView()
+            } label: {
+                RestoreRitualRow(title: "Focus lock", subtitle: focusSubtitle, systemImage: "lock.shield.fill")
             }
         }
         .buttonStyle(.plain)

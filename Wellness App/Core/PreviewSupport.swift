@@ -18,5 +18,8 @@ extension View {
             .environment(state.activity)
             .environment(state.restore)
             .environment(state.companion)
+            .environment(state.healthKit)
+            .environment(state.notifications)
+            .environment(state.focus)
     }
 }

@@ -21,6 +21,7 @@ final class AppState {
 
     let healthKit = HealthKitManager()
     let notifications = NotificationManager()
+    let focus = FocusManager()
 
     init(seeded: Bool = false) {
         self.user = UserStore(seeded: seeded)
