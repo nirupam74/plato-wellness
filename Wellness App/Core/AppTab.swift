@@ -8,6 +8,7 @@
 import SwiftUI
 
 enum AppTab: Hashable {
+    case home
     case nutrition
     case activity
     case restore
@@ -15,6 +16,7 @@ enum AppTab: Hashable {
 
     var tint: Color {
         switch self {
+        case .home:      Theme.accent
         case .nutrition: Theme.nutrition
         case .activity:  Theme.activity
         case .restore:   Theme.restore

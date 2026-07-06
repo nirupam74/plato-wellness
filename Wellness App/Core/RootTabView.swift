@@ -15,6 +15,10 @@ struct RootTabView: View {
         @Bindable var appState = appState
 
         TabView(selection: $appState.selectedTab) {
+            HomeView()
+                .tabItem { Label("Home", systemImage: "house") }
+                .tag(AppTab.home)
+
             NutritionView()
                 .tabItem { Label("Nutrition", systemImage: "fork.knife") }
                 .tag(AppTab.nutrition)

@@ -11,7 +11,7 @@ import Observation
 
 @Observable
 final class AppState {
-    var selectedTab: AppTab = .nutrition
+    var selectedTab: AppTab = .home
 
     let user: UserStore
     let nutrition: NutritionStore
