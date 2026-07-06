@@ -171,8 +171,10 @@ final class UserStore {
     // MARK: - Progress photos
 
     /// Upload image bytes to Storage and record the download URL in Firestore.
-    func uploadPhoto(_ data: Data) async {
-        guard let uid else { return }
+    /// Returns true on success so the UI can surface a retry prompt on failure.
+    @discardableResult
+    func uploadPhoto(_ data: Data) async -> Bool {
+        guard let uid else { return false }
         let id = UUID().uuidString
         let ref = Storage.storage().reference().child("users/\(uid)/progressPhotos/\(id).jpg")
         let metadata = StorageMetadata()
@@ -182,8 +184,10 @@ final class UserStore {
             let url = try await ref.downloadURL()
             let photo = ProgressPhoto(id: id, url: url.absoluteString)
             try db.collection("users/\(uid)/progressPhotos").document(id).setData(from: photo)
+            return true
         } catch {
             // Non fatal: the user can retry. Manual entry is unaffected.
+            return false
         }
     }
 

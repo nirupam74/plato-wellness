@@ -291,6 +291,7 @@ private struct ProfilePhotoGallery: View {
     @Environment(UserStore.self) private var user
     @State private var pickerItem: PhotosPickerItem?
     @State private var isUploading = false
+    @State private var uploadFailed = false
 
     private let columns = [GridItem(.adaptive(minimum: 90), spacing: 12)]
 
@@ -339,6 +340,13 @@ private struct ProfilePhotoGallery: View {
                 }
             }
 
+            if uploadFailed {
+                Label("Could not add that photo. Check your connection and try again.", systemImage: "exclamationmark.triangle")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             Text(user.progressPhotos.isEmpty
                  ? "Add photos to track visible progress over time. Your gallery is private."
                  : "Your gallery is private. Nobody else can see these.")
@@ -349,10 +357,13 @@ private struct ProfilePhotoGallery: View {
         .onChange(of: pickerItem) { _, item in
             guard let item else { return }
             isUploading = true
+            uploadFailed = false
             Task {
+                var ok = false
                 if let data = try? await item.loadTransferable(type: Data.self) {
-                    await user.uploadPhoto(data)
+                    ok = await user.uploadPhoto(data)
                 }
+                uploadFailed = !ok
                 pickerItem = nil
                 isUploading = false
             }
