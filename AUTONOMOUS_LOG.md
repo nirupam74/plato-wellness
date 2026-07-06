@@ -41,3 +41,4 @@ change.
 | 2026-07-06 01:50 | self-directed | FIX: onboarding Foods to avoid was silently discarded (no UserProfile field); added optional foodsToAvoid to model + makeProfile. Follow-up: surface allergies/foodsToAvoid in profile editing | b935287 |
 | 2026-07-06 01:57 | self-directed | Diet type / allergies / foods-to-avoid now viewable + editable in Goals & targets (were onboarding-only, unreachable after); completes the foodsToAvoid fix | 080de43 |
 | 2026-07-06 02:03 | self-directed | companionChat context note now includes consent-gated diet/allergies/foods-to-avoid (safety: never-suggest allergies), reusing already-fetched profile. Verified: consent gating + mood/sleep/activity already correctly wired. NEEDS firebase deploy --only functions | c8543e1 |
+| 2026-07-06 02:11 | self-directed | Data export now includes companion messages (JSON + CSV + count row); verified ProfileExporter is a real serializer, not a stub | 6d06b1f |
