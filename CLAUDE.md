@@ -16,6 +16,9 @@ Global principles in `~/.claude/CLAUDE.md` apply. This file adds only project sp
 - Functions syntax check: `node --check functions/index.js`
 - Deploy: `firebase deploy --only firestore:rules` (or `firestore:indexes`, `storage`, `functions`)
 
+## Verification — what "done" means here
+- There is **no test suite**. The gate is `** BUILD SUCCEEDED **` (plus `node --check` for functions) **and** exercising the changed flow in the simulator where feasible. Check `BACKEND.md` for what's wired vs stubbed before assuming a backend feature works.
+
 ## Branches
 - `auto/build-out` — primary loop work line; `main` fast-forwards to it. **Don't commit to `main` directly** (keep it an ancestor of the branch, or the loop's fast-forward breaks).
 
