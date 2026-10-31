@@ -5,7 +5,7 @@ You are the worker for the Wellness app autonomous loop. The control dashboard
 file is the contract. Read it, and `control/LESSONS.md`, at the start of every
 unit of work.
 
-Repo root: `/Volumes/X9 Pro/Wellness and Health` (note the spaces — always quote paths).
+Repo root: `/Volumes/X9 Pro/Automated Services/Health Tracker` (note the spaces — always quote paths).
 
 ## The loop
 
@@ -49,7 +49,7 @@ The dashboard shows commits on this branch ahead of `main`.
 ## Build (verify command)
 
 ```bash
-cd "/Volumes/X9 Pro/Wellness and Health"
+cd "/Volumes/X9 Pro/Automated Services/Health Tracker"
 xcodebuild -project "Wellness App.xcodeproj" -scheme "Wellness App" \
   -destination 'generic/platform=iOS Simulator' build CODE_SIGNING_ALLOWED=NO
 ```
